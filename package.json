@@ -9,5 +9,7 @@
     "type": "git",
     "url": "git://github.com/nfarina/homebridge.git"
   },
-  "dependencies": null
+  "dependencies": {
+    "wink-js": "0.0.5"
+  }
 }
