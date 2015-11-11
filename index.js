@@ -1,12 +1,31 @@
-var types = require("../api").homebridge.hapLegacyTypes;
 var wink = require('wink-js');
-var Service = require("../api").homebridge.hap.Service;
-var Characteristic = require("../api").homebridge.hap.Characteristic;
-var Accessory = require("../api").homebridge.hap.Accessory;
-var uuid = require("../api").homebridge.hap.uuid;
 var inherits = require('util').inherits;
 
 process.env.WINK_NO_CACHE = true;
+
+var Service, Characteristic, Accessory, uuid;
+
+module.exports = function(homebridge) {
+    Service = homebridge.hap.Service;
+    Characteristic = homebridge.hap.Characteristic;
+    Accessory = homebridge.hap.Accessory;
+    uuid = homebridge.hap.uuid;
+
+    var copyInherit = function(orig, base){
+      var acc = orig.prototype;
+      inherits(orig, base);
+      orig.prototype.parent = base.prototype;
+      for (var mn in acc) {
+          orig.prototype[mn] = acc[mn];
+      }
+    };
+
+    copyInherit(WinkAccessory, Accessory);
+    copyInherit(WinkLightAccessory, WinkAccessory);
+    copyInherit(WinkLockAccessory, WinkAccessory);
+
+    homebridge.registerPlatform("homebridge-wink", "Wink", WinkPlatform);
+};
 
 var model = {
   light_bulbs: require('wink-js/lib/model/light'),
@@ -137,9 +156,6 @@ function WinkAccessory(log, device, type, typeId) {
   WinkAccessory.prototype.loadData.call(this);
 }
 
-inherits(WinkAccessory, Accessory);
-WinkAccessory.prototype.parent = Accessory.prototype;
-
 WinkAccessory.prototype.getServices = function() {
   return this.services;
 };
@@ -238,9 +254,6 @@ function WinkLightAccessory(log, device) {
   WinkLightAccessory.prototype.loadData.call(this);
 }
 
-inherits(WinkLightAccessory, WinkAccessory);
-WinkLightAccessory.prototype.parent = WinkAccessory.prototype;
-
 WinkLightAccessory.prototype.loadData = function() {
   this.parent.loadData.call(this);
   this.getService(Service.Lightbulb)
@@ -309,9 +322,6 @@ function WinkLockAccessory(log, device) {
   WinkLockAccessory.prototype.loadData.call(this);
 }
 
-inherits(WinkLockAccessory, WinkAccessory);
-WinkLockAccessory.prototype.parent = WinkAccessory.prototype;
-
 WinkLockAccessory.prototype.loadData = function() {
   this.parent.loadData.call(this);
   this.getService(Service.LockMechanism)
@@ -343,8 +353,3 @@ WinkLockAccessory.prototype.isLockTarget= function() {
 WinkLockAccessory.prototype.isLocked= function() {
   return this.toLockState(this.device.last_reading.locked);
 };
-
-module.exports.accessory = WinkAccessory;
-module.exports.lockAccessory = WinkLockAccessory;
-module.exports.lightAccessory = WinkLightAccessory;
-module.exports.platform = WinkPlatform;
