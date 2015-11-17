@@ -1,10 +1,10 @@
 {
-  "name": "homebridge-legacy-plugins",
+  "name": "homebridge-wink",
   "description": "Legacy plugins for homebridge: https://github.com/nfarina/homebridge",
   "version": "0.0.5",
   "repository": {
     "type": "git",
-    "url": "git://github.com/nfarina/homebridge-legacy-plugins.git"
+    "url": "git://github.com/nfarina/homebridge-wink.git"
   },
   "license": "ISC",
   "preferGlobal": true,

@@ -26,31 +26,8 @@ module.exports = function(homebridge) {
 
     homebridge.registerPlatform("homebridge-wink", "Wink", WinkPlatform);
 };
+var model = wink.model;
 
-var model = {
-  light_bulbs: require('wink-js/lib/model/light'),
-  refreshUntil: function(that, maxTimes, predicate, callback, interval, incrementInterval) {
-    if (!interval) {
-      interval = 500;
-    }
-    if (!incrementInterval) {
-      incrementInterval = 500;
-    }
-    setTimeout(function() {
-      that.reloadData(function() {
-        if (predicate == undefined || predicate(that.device) == true) {
-          if (callback) callback(true);
-        } else if (maxTimes > 0) {
-          maxTimes = maxTimes - 1;
-          interval += incrementInterval;
-          model.refreshUntil(that, maxTimes, predicate, callback, interval, incrementInterval);
-        } else {
-          if (callback) callback(false);
-        }
-      });
-    }, interval);
-  }
-};
 
 function WinkPlatform(log, config){
 
@@ -106,6 +83,7 @@ WinkPlatform.prototype = {
           for (var i=0; i<devices.data.length; i++){
             var device = devices.data[i];
             var accessory = null;
+            
             if (device.light_bulb_id !== undefined) {
               accessory = new WinkLightAccessory(that.log, device);
             } else if (device.lock_id !== undefined) {
@@ -133,6 +111,7 @@ function WinkAccessory(log, device, type, typeId) {
   // construct base
   this.device = device;
   this.name = device.name;
+  
   this.log = log;
   if (typeId == undefined) {
     typeId = this.name;
@@ -151,7 +130,8 @@ function WinkAccessory(log, device, type, typeId) {
   this
       .getService(Service.AccessoryInformation)
       .setCharacteristic(Characteristic.Manufacturer, this.device.device_manufacturer)
-      .setCharacteristic(Characteristic.Model, this.device.model_name);
+      .setCharacteristic(Characteristic.Model, this.device.model_name)
+      .setCharacteristic(Characteristic.Name, this.device.name);
 
   WinkAccessory.prototype.loadData.call(this);
 }
@@ -195,35 +175,28 @@ function WinkLightAccessory(log, device) {
 
   that.device = device;
   that.deviceControl = model.light_bulbs(device, wink);
-
+ 
   this
       .addService(Service.Lightbulb)
       .getCharacteristic(Characteristic.On)
       .on('get', function(callback) {
-        var powerState = that.device.desired_state.powered;
-        that.log("power state for " + that.name + " is: " + powerState);
+        var powerState = that.device.last_reading.powered;
         callback(null, powerState != undefined ? powerState : false);
       })
       .on('set', function(powerOn, callback) {
         if (powerOn) {
-          that.log("Setting power state on the '"+that.name+"' to on");
           that.deviceControl.power.on(function(response) {
             if (response === undefined) {
-              that.log("Error setting power state on the '"+that.name+"'");
               callback(Error("Error setting power state on the '"+that.name+"'"));
             } else {
-              that.log("Successfully set power state on the '"+that.name+"' to on");
               callback(null, powerOn);
             }
           });
         }else{
-          that.log("Setting power state on the '"+that.name+"' to off");
           that.deviceControl.power.off(function(response) {
             if (response === undefined) {
-              that.log("Error setting power state on the '"+that.name+"'");
               callback(Error("Error setting power state on the '"+that.name+"'"));
             } else {
-              that.log("Successfully set power state on the '"+that.name+"' to off");
               callback(null, powerOn);
             }
           });
@@ -234,18 +207,14 @@ function WinkLightAccessory(log, device) {
       .getService(Service.Lightbulb)
       .getCharacteristic(Characteristic.Brightness)
       .on('get', function(callback) {
-        var level = that.device.desired_state.brightness * 100;
-        that.log("brightness level for " + that.name + " is: " + level);
+        var level = that.device.last_reading.brightness * 100;
         callback(null, level);
       })
       .on('set', function(level, callback) {
-        that.log("Setting brightness on the '"+this.name+"' to " + level);
         that.deviceControl.brightness(level, function(response) {
           if (response === undefined) {
-            that.log("Error setting brightness on the '"+that.name+"'");
             callback(Error("Error setting brightness on the '"+that.name+"'"));
           } else {
-            that.log("Successfully set brightness on the '"+that.name+"' to " + level);
             callback(null, level);
           }
         });
@@ -261,6 +230,57 @@ WinkLightAccessory.prototype.loadData = function() {
       .getValue();
   this.getService(Service.Lightbulb)
       .getCharacteristic(Characteristic.Brightness)
+      .getValue();
+};
+
+/*
+ *   Switch Accessory
+ */
+
+function WinkSwitchAccessory(log, device) {
+  // construct base
+  WinkAccessory.call(this, log, device, 'binary_switches', device.binary_switch_id);
+
+  // accessor
+  var that = this;
+
+  that.device = device;
+  that.deviceControl = model.binary_switches(device, wink);
+ 
+  this
+      .addService(Service.Lightbulb)
+      .getCharacteristic(Characteristic.On)
+      .on('get', function(callback) {
+        var powerState = that.device.last_reading.powered;
+        callback(null, powerState != undefined ? powerState : false);
+      })
+      .on('set', function(powerOn, callback) {
+        if (powerOn) {
+          that.deviceControl.power.on(function(response) {
+            if (response === undefined) {
+              callback(Error("Error setting power state on the '"+that.name+"'"));
+            } else {
+              callback(null, powerOn);
+            }
+          });
+        }else{
+          that.deviceControl.power.off(function(response) {
+            if (response === undefined) {
+              callback(Error("Error setting power state on the '"+that.name+"'"));
+            } else {
+              callback(null, powerOn);
+            }
+          });
+        }
+      });
+
+  WinkSwitchAccessory.prototype.loadData.call(this);
+}
+
+WinkSwitchAccessory.prototype.loadData = function() {
+  this.parent.loadData.call(this);
+  this.getService(Service.Lightbulb)
+      .getCharacteristic(Characteristic.On)
       .getValue();
 };
 
