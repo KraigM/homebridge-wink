@@ -70,12 +70,14 @@ WinkPlatform.prototype = {
     this.log("Refreshing Wink Data");
     var that = this;
     wink.user().devices(function(devices) {
-      for (var i=0; i<devices.data.length; i++){
-        var device = devices.data[i];
-        var accessory = that.deviceLookup[device.lock_id | device.light_bulb_id | ""];
-        if (accessory != undefined) {
-          accessory.device = device;
-          accessory.loadData();
+      if (devices && devices.data && devices.data instanceof Array) {
+        for (var i=0; i<devices.data.length; i++){
+          var device = devices.data[i];
+          var accessory = that.deviceLookup[device.lock_id | device.light_bulb_id | ""];
+          if (accessory != undefined) {
+            accessory.device = device;
+            accessory.loadData();
+          }
         }
       }
       if (callback) callback();
