@@ -1,21 +1,22 @@
 {
   "name": "homebridge-wink",
   "description": "Legacy plugins for homebridge: https://github.com/nfarina/homebridge",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "repository": {
     "type": "git",
-    "url": "git://github.com/nfarina/homebridge-wink.git"
+    "url": "git://github.com/kraigm/homebridge-wink.git"
   },
   "license": "ISC",
   "preferGlobal": true,
   "keywords": [
-    "homebridge-plugin"
+    "homebridge-plugin",
+	"wink"
   ],
   "engines": {
     "node": ">=0.12.0",
     "homebridge": ">=0.2.5"
   },
   "dependencies": {
-    "wink-js": "0.0.5"
+    "wink-js": "0.0.9"
   }
 }

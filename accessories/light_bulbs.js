@@ -1,9 +1,6 @@
 var wink = require('wink-js');
 var inherits = require('util').inherits;
 
-/*
- *   Generic Accessory
- */
 var Service, Characteristic, Accessory, uuid;
 
 /*
@@ -24,14 +21,14 @@ function WinkLightAccessory(platform, device, oService, oCharacteristic, oAccess
  Accessory = oAccessory;
  uuid = ouuid;
 
-  var idKey = 'hbdev:wink:' + this.device.name + ':' + this.deviceGroup + ':' + this.deviceId;
+  var idKey = 'hbdev:wink:' + this.deviceGroup + ':' + this.deviceId;
   var id = uuid.generate(idKey);
   Accessory.call(this, this.name, id);
   this.uuid_base = id;
 
   this.control = wink.device_group(this.deviceGroup).device_id(this.deviceId);
 
-  this.log(idKey);
+  //this.log(idKey+' '+ JSON.stringify(device));
   var that = this;
   // set some basic properties (these values are arbitrary and setting them is optional)
   this
@@ -49,7 +46,8 @@ function WinkLightAccessory(platform, device, oService, oCharacteristic, oAccess
       .on('set', function(value, callback) {
         platform.UpdateWinkProperty_noFeedback(that, callback, "powered", value);
       });
-      
+
+  if (that.device.desired_state.brightness !== undefined)      
      this
       .getService(Service.Lightbulb)
       .getCharacteristic(Characteristic.Brightness)
@@ -59,6 +57,28 @@ function WinkLightAccessory(platform, device, oService, oCharacteristic, oAccess
       .on('set', function(value, callback) {
         platform.UpdateWinkProperty_noFeedback(that, callback, "brightness", value/100);
       });
+
+  if (that.device.desired_state.hue !== undefined)      
+     this
+      .getService(Service.Lightbulb)
+      .getCharacteristic(Characteristic.Hue)
+      .on('get', function(callback) {
+        callback(null, that.device.last_reading.hue);
+      })
+      .on('set', function(value, callback) {
+        platform.UpdateWinkProperty_noFeedback(that, callback, "hue", value);
+      });
+
+  if (that.device.desired_state.saturation !== undefined)      
+     this
+      .getService(Service.Lightbulb)
+      .getCharacteristic(Characteristic.Saturation)
+      .on('get', function(callback) {
+        callback(null, that.device.last_reading.saturation);
+      })
+      .on('set', function(value, callback) {
+        platform.UpdateWinkProperty_noFeedback(that, callback, "saturation", value);
+      });
 }
 
 WinkLightAccessory.prototype = {
@@ -66,8 +86,20 @@ WinkLightAccessory.prototype = {
     this.getService(Service.Lightbulb)
       .getCharacteristic(Characteristic.On)
       .getValue();
+      
+  if (this.device.desired_state.brightness !== undefined)      
     this.getService(Service.Lightbulb)
       .getCharacteristic(Characteristic.Brightness)
+      .getValue();
+
+  if (this.device.desired_state.hue !== undefined)      
+    this.getService(Service.Lightbulb)
+      .getCharacteristic(Characteristic.Hue)
+      .getValue();
+
+  if (this.device.desired_state.saturation !== undefined)      
+    this.getService(Service.Lightbulb)
+      .getCharacteristic(Characteristic.Saturation)
       .getValue();
   },
   
