@@ -12,6 +12,7 @@ var WinkSmokeDetectorAccessory = require('./accessories/smoke_detectors');
 var WinkThermostatAccessory = require('./accessories/thermostats');
 var WinkAirConditionerAccessory = require('./accessories/air_conditioners');
 var WinkSensorAccessory = require('./accessories/sensor_pods');
+var WinkPropaneTankAccessory = require('./accessories/propane_tanks');
 
 process.env.WINK_NO_CACHE = true;
 
@@ -43,6 +44,7 @@ module.exports = function(homebridge) {
     copyInherit(WinkThermostatAccessory, Accessory);
     copyInherit(WinkAirConditionerAccessory, Accessory);
     copyInherit(WinkSensorAccessory, Accessory);
+    copyInherit(WinkPropaneTankAccessory, Accessory);
 };
 
 function WinkPlatform(log, config) {
@@ -81,7 +83,7 @@ WinkPlatform.prototype = {
                 for (var i = 0; i < devices.data.length; i++) {
                     var device = devices.data[i];
                     //NEWMODULE: Add the id here. I'm planning to redesign this section.
-                    var accessory = that.deviceLookup[device.lock_id | device.light_bulb_id | device.binary_switch_id | device.garage_door_id | device.outlet_id | device.smoke_detector_id | device.thermostat_id | device.air_conditioner_id | device.sensor_pod_id | ""];
+                    var accessory = that.deviceLookup[device.lock_id | device.light_bulb_id | device.binary_switch_id | device.garage_door_id | device.outlet_id | device.smoke_detector_id | device.thermostat_id | device.air_conditioner_id | device.sensor_pod_id | device.propane_tank_id | ""];
                     if (accessory != undefined) {
                         accessory.device = device;
                         accessory.loadData();
@@ -151,6 +153,9 @@ WinkPlatform.prototype = {
 
                         else if (device.sensor_pod_id !== undefined)
                             accessory = new WinkSensorAccessory(that, device, Service, Characteristic, Accessory, uuid);
+
+						else if (device.propane_tank_id !== undefined)
+                            accessory = new WinkPropaneTankAccessory(that, device, Service, Characteristic, Accessory, uuid);
 
                         //These are here to prevent Unknown Device Groups in the logs when we know what the device is and can't represent it 
                         //with a HomeKit service yet.

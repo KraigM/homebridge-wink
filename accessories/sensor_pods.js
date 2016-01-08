@@ -44,11 +44,27 @@ function WinkLockAccessory(platform, device, oService, oCharacteristic, oAccesso
     //external_power
     //loudness 0/1
     //vibration 0/1
-
-    //opened true/false
     //tamper_detected true/false
 
-    //Motion detector with PIR
+
+  //Occupancy
+    if (that.device.last_reading.occupied !== undefined) {
+        this
+            .addService(Service.OccupancySensor)
+            .getCharacteristic(Characteristic.OccupancyDetected)
+            .on('get', function(callback) {
+                callback(null, that.device.last_reading.occupied);
+            });
+        if (that.device.last_reading.tamper_detected !== undefined)
+            this
+            .getService(Service.OccupancySensor)
+            .getCharacteristic(Characteristic.StatusTampered)
+            .on('get', function(callback) {
+                callback(null, that.device.last_reading.tamper_detected);
+            });
+    }
+
+  //Motion detector with PIR
     if (that.device.last_reading.motion !== undefined) {
         this
             .addService(Service.MotionSensor)
