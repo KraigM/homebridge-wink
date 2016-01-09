@@ -39,7 +39,7 @@ function WinkSirenAccessory(platform, device) {
 		.on('get', function (callback) {
 			if (!that.device.last_reading.powered)
 				callback(null, false);
-			else if (that.device.last_reading.mode=='siren_only')
+			else if (that.device.last_reading.mode == 'siren_only')
 				callback(null, false);
 			else
 				callback(null, true);
@@ -63,40 +63,40 @@ function WinkSirenAccessory(platform, device) {
 			}
 		});
 
-			//Siren as a switch
-			this
-				.addService(Service.Switch)
-				.setCharacteristic(Characteristic.Name, "Siren");
+	//Siren as a switch
+	this
+		.addService(Service.Switch)
+		.setCharacteristic(Characteristic.Name, "Siren");
 
-			this
-				.getService(Service.Switch)
-				.getCharacteristic(Characteristic.On)
-				.on('get', function (callback) {
-					if (!that.device.last_reading.powered)
-						callback(null, false);
-					else if (that.device.last_reading.mode=='strobe_only')
-						callback(null, false);
-					else
-						callback(null, true);
-				})
+	this
+		.getService(Service.Switch)
+		.getCharacteristic(Characteristic.On)
+		.on('get', function (callback) {
+			if (!that.device.last_reading.powered)
+				callback(null, false);
+			else if (that.device.last_reading.mode == 'strobe_only')
+				callback(null, false);
+			else
+				callback(null, true);
+		})
 
-				.on('set', function (value, callback) {
-					if (value) {
-						if (!that.device.last_reading.powered)
-							that.updatePropertyWithoutFeedback(callback, ["powered", "mode"], [true, "siren_only"]);
-						else if (that.device.last_reading.mode == 'siren_only')
-							that.updatePropertyWithoutFeedback(callback, ["powered", "mode"], [true, "siren_and_strobe"]);
-						else
-							that.updatePropertyWithoutFeedback(callback, ["powered", "mode"], [true, "siren_only"]);
-					} else {
-						if (that.device.last_reading.powered)
-							that.updatePropertyWithoutFeedback(callback, "powered", false);
-						else if (that.device.last_reading.mode == "siren_and_strobe")
-							that.updatePropertyWithoutFeedback(callback, "mode", "strobe_only");
-						else
-							that.updatePropertyWithoutFeedback(callback, "powered", false);
-					}
-				});
+		.on('set', function (value, callback) {
+			if (value) {
+				if (!that.device.last_reading.powered)
+					that.updatePropertyWithoutFeedback(callback, ["powered", "mode"], [true, "siren_only"]);
+				else if (that.device.last_reading.mode == 'siren_only')
+					that.updatePropertyWithoutFeedback(callback, ["powered", "mode"], [true, "siren_and_strobe"]);
+				else
+					that.updatePropertyWithoutFeedback(callback, ["powered", "mode"], [true, "siren_only"]);
+			} else {
+				if (that.device.last_reading.powered)
+					that.updatePropertyWithoutFeedback(callback, "powered", false);
+				else if (that.device.last_reading.mode == "siren_and_strobe")
+					that.updatePropertyWithoutFeedback(callback, "mode", "strobe_only");
+				else
+					that.updatePropertyWithoutFeedback(callback, "powered", false);
+			}
+		});
 
 	this.loadData();
 }
