@@ -1,4 +1,3 @@
-var wink = require('wink-js');
 var inherits = require('util').inherits;
 
 var WinkAccessory, Accessory, Service, Characteristic, uuid;
@@ -53,7 +52,8 @@ function WinkGarageDoorAccessory(platform, device) {
 				callback(null, Characteristic.CurrentDoorState.CLOSED);
 			else if (that.device.last_reading.position == 1)
 				callback(null, Characteristic.CurrentDoorState.OPEN);
-		})
+		});
+
 	this
 		.getService(Service.GarageDoorOpener)
 		.setCharacteristic(Characteristic.ObstructionDetected, false);
