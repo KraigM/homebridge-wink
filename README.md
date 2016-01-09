@@ -5,7 +5,9 @@ This repository contains the Wink plugin for homebridge that was previously bund
 
 # Installation
 
-Instructions Coming Soon.
+1. Install homebridge using: npm install -g homebridge
+2. Install this plugin using: npm install -g homebridge-wink
+3. Update your configuration file. See sample config.json snippet below. 
 
 # Configuration
 
@@ -20,8 +22,8 @@ Configuration sample:
 			"client_secret": "YOUR_WINK_API_CLIENT_SECRET",
 			"username": "your@email.com",
 			"password": "WINK_PASSWORD",
-        	"hide_groups": ["garage_doors", "thermostats"],
-        	"hide_ids": []
+			"hide_groups": ["garage_doors", "thermostats"],
+			"hide_ids": []
 			
 		}
 	],
