@@ -1,41 +1,33 @@
 var wink = require('wink-js');
 var inherits = require('util').inherits;
 
-var Service, Characteristic, Accessory, uuid;
+var WinkAccessory, Accessory, Service, Characteristic, uuid;
 
 /*
- *   Garage Door Accessory
+ *   Smoke Detector Accessory
  */
 
-function WinkSmokeDetectorAccessory(platform, device, oService, oCharacteristic, oAccessory, ouuid) {
-  // Common Base Items
-  this.device = device;
-  this.name = device.name;
-  this.log = platform.log;
-  this.platform = platform;
-  this.deviceGroup='smoke_detectors';
-  this.deviceId=this.device.smoke_detector_id;
+module.exports = function(oWinkAccessory, oAccessory, oService, oCharacteristic, ouuid)
+{
+    if (oWinkAccessory) {
+        WinkAccessory = oWinkAccessory;
+        Accessory = oAccessory;
+        Service = oService;
+        Characteristic = oCharacteristic;
+        uuid = ouuid;
 
- Service = oService;
- Characteristic = oCharacteristic;
- Accessory = oAccessory;
- uuid = ouuid;
+        inherits(WinkSmokeDetectorAccessory, WinkAccessory);
+        WinkSmokeDetectorAccessory.prototype.loadData = loadData;
+        WinkSmokeDetectorAccessory.prototype.deviceGroup = 'smoke_detectors';
+    }
+    return WinkSmokeDetectorAccessory;
+};
+module.exports.WinkSmokeDetectorAccessory = WinkSmokeDetectorAccessory;
 
-  var idKey = 'hbdev:wink:' + this.deviceGroup + ':' + this.deviceId;
-  var id = uuid.generate(idKey);
-  Accessory.call(this, this.name, id);
-  this.uuid_base = id;
+function WinkSmokeDetectorAccessory(platform, device) {
+    WinkAccessory.call(this, platform, device, device.smoke_detector_id);
 
-  this.control = wink.device_group(this.deviceGroup).device_id(this.deviceId);
-
-  //this.log(idKey+' '+ JSON.stringify(device));
-  var that = this;
-  // set some basic properties (these values are arbitrary and setting them is optional)
-  this
-      .getService(Service.AccessoryInformation)
-      .setCharacteristic(Characteristic.Manufacturer, this.device.device_manufacturer)
-      .setCharacteristic(Characteristic.Model, this.device.model_name)
-      .setCharacteristic(Characteristic.Name, this.device.name);
+    var that = this;
       
   //Items specific to Smoke Detectors:
   if (this.device.last_reading.co_detected !== undefined) {
@@ -98,56 +90,42 @@ function WinkSmokeDetectorAccessory(platform, device, oService, oCharacteristic,
     this.getService(Service.BatteryService)  
       .setCharacteristic(Characteristic.ChargingState, Characteristic.ChargingState.NOT_CHARGING);
   }
-//End Battery Level Tracking     
+//End Battery Level Tracking
+
+    this.loadData();
 }
 
-WinkSmokeDetectorAccessory.prototype = {
-  loadData: function() {
-    
-  if (this.device.last_reading.co_detected !== undefined) {
-    this.getService(Service.CarbonMonoxideSensor)  
-      .getCharacteristic(Characteristic.CarbonMonoxideDetected)
-      .getValue();
-  if (this.device.last_reading.battery !== undefined)    
-    this.getService(Service.CarbonMonoxideSensor)  
-      .getCharacteristic(Characteristic.StatusLowBattery)
-      .getValue();
-   }
-      
-  if (this.device.last_reading.smoke_detected !== undefined) {
-    this.getService(Service.SmokeSensor)  
-      .getCharacteristic(Characteristic.SmokeDetected)
-      .getValue();
-  if (this.device.last_reading.battery !== undefined)    
-    this.getService(Service.SmokeSensor)  
-      .getCharacteristic(Characteristic.StatusLowBattery)
-      .getValue();
+var loadData = function() {
+    if (this.device.last_reading.co_detected !== undefined) {
+        this.getService(Service.CarbonMonoxideSensor)
+            .getCharacteristic(Characteristic.CarbonMonoxideDetected)
+            .getValue();
+
+        if (this.device.last_reading.battery !== undefined) {
+            this.getService(Service.CarbonMonoxideSensor)
+                .getCharacteristic(Characteristic.StatusLowBattery)
+                .getValue();
+        }
     }
-  
-  
-  if (this.device.last_reading.battery !== undefined) {
-    this.getService(Service.BatteryService)  
-      .getCharacteristic(Characteristic.BatteryLevel)
-      .getValue();
-    this.getService(Service.BatteryService)  
-      .getCharacteristic(Characteristic.StatusLowBattery)
-      .getValue();
+
+    if (this.device.last_reading.smoke_detected !== undefined) {
+        this.getService(Service.SmokeSensor)
+            .getCharacteristic(Characteristic.SmokeDetected)
+            .getValue();
+
+        if (this.device.last_reading.battery !== undefined) {
+            this.getService(Service.SmokeSensor)
+                .getCharacteristic(Characteristic.StatusLowBattery)
+                .getValue();
+        }
     }
-  },
-  
-  getServices: function() {
-    return this.services;
-  },
-  
-  handleResponse: function(res) {
-    if (!res) {
-      return Error("No response from Wink");
-    } else if (res.errors && res.errors.length > 0) {
-      return res.errors[0];
-    } else if (res.data) {
-      this.device = res.data;
-      this.loadData();
+
+    if (this.device.last_reading.battery !== undefined) {
+        this.getService(Service.BatteryService)
+            .getCharacteristic(Characteristic.BatteryLevel)
+            .getValue();
+        this.getService(Service.BatteryService)
+            .getCharacteristic(Characteristic.StatusLowBattery)
+            .getValue();
     }
-  }
-}
-module.exports = WinkSmokeDetectorAccessory;
+};

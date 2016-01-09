@@ -1,50 +1,41 @@
 //
 var wink = require('wink-js');
-var inherits = require('util').inherits;
-
-//NEWMODULE: Add the object reference here
-var WinkLockAccessory = require('./accessories/locks');
-var WinkLightAccessory = require('./accessories/light_bulbs');
-var WinkSwitchAccessory = require('./accessories/binary_switches');
-var WinkGarageDoorAccessory = require('./accessories/garage_doors');
-var WinkOutletAccessory = require('./accessories/outlets');
-var WinkSmokeDetectorAccessory = require('./accessories/smoke_detectors');
-var WinkThermostatAccessory = require('./accessories/thermostats');
-var WinkAirConditionerAccessory = require('./accessories/air_conditioners');
-var WinkSensorAccessory = require('./accessories/sensor_pods');
-var WinkPropaneTankAccessory = require('./accessories/propane_tanks');
 
 process.env.WINK_NO_CACHE = true;
 
 var Service, Characteristic, Accessory, uuid;
+
+var WinkAccessory;
+var WinkLockAccessory;
+var WinkLightAccessory;
+var WinkSwitchAccessory;
+var WinkGarageDoorAccessory;
+var WinkOutletAccessory;
+var WinkSmokeDetectorAccessory;
+var WinkThermostatAccessory;
+var WinkAirConditionerAccessory;
+var WinkSensorAccessory;
+var WinkPropaneTankAccessory;
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
     Accessory = homebridge.hap.Accessory;
     uuid = homebridge.hap.uuid;
+
+    WinkAccessory = require('./lib/wink-accessory')(Accessory, Service, Characteristic, uuid);
+    WinkLockAccessory = require('./accessories/locks')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+    WinkLightAccessory = require('./accessories/light_bulbs')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+    WinkSwitchAccessory = require('./accessories/binary_switches')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+    WinkGarageDoorAccessory = require('./accessories/garage_doors')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+    WinkOutletAccessory = require('./accessories/outlets')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+    WinkSmokeDetectorAccessory = require('./accessories/smoke_detectors')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+    WinkThermostatAccessory = require('./accessories/thermostats')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+    WinkAirConditionerAccessory = require('./accessories/air_conditioners')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+    WinkSensorAccessory = require('./accessories/sensor_pods')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+    WinkPropaneTankAccessory = require('./accessories/propane_tanks')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+
     homebridge.registerPlatform("homebridge-wink", "Wink", WinkPlatform);
-
-    var copyInherit = function(orig, base) {
-        var acc = orig.prototype;
-        inherits(orig, base);
-        orig.prototype.parent = base.prototype;
-        for (var mn in acc) {
-            orig.prototype[mn] = acc[mn];
-        }
-    }
-
-    //NEWMODULE: Add a line for inheriting the Accessory class
-    copyInherit(WinkLockAccessory, Accessory);
-    copyInherit(WinkLightAccessory, Accessory);
-    copyInherit(WinkSwitchAccessory, Accessory);
-    copyInherit(WinkGarageDoorAccessory, Accessory);
-    copyInherit(WinkOutletAccessory, Accessory);
-    copyInherit(WinkSmokeDetectorAccessory, Accessory);
-    copyInherit(WinkThermostatAccessory, Accessory);
-    copyInherit(WinkAirConditionerAccessory, Accessory);
-    copyInherit(WinkSensorAccessory, Accessory);
-    copyInherit(WinkPropaneTankAccessory, Accessory);
 };
 
 function WinkPlatform(log, config) {
@@ -121,20 +112,20 @@ WinkPlatform.prototype = {
                         //Get Device Type
                         //NEWMODULE: Add Appropriate Lines Here
                         if (device.light_bulb_id !== undefined)
-                            accessory = new WinkLightAccessory(that, device, Service, Characteristic, Accessory, uuid);
+                            accessory = new WinkLightAccessory(that, device);
 
                         else if (device.garage_door_id !== undefined)
-                            accessory = new WinkGarageDoorAccessory(that, device, Service, Characteristic, Accessory, uuid);
+                            accessory = new WinkGarageDoorAccessory(that, device);
 
                         else if (device.lock_id !== undefined)
-                            accessory = new WinkLockAccessory(that, device, Service, Characteristic, Accessory, uuid);
+                            accessory = new WinkLockAccessory(that, device);
 
                         else if (device.binary_switch_id !== undefined)
-                            accessory = new WinkSwitchAccessory(that, device, Service, Characteristic, Accessory, uuid);
+                            accessory = new WinkSwitchAccessory(that, device);
 
                         else if (device.powerstrip_id !== undefined) {
                             for (var j = 0; j < device.outlets.length; j++) {
-                                accessory = new WinkOutletAccessory(that, device.outlets[j], Service, Characteristic, Accessory, uuid);
+                                accessory = new WinkOutletAccessory(that, device.outlets[j]);
                                 if (accessory != undefined) {
                                     that.deviceLookup[accessory.deviceId] = accessory;
                                     foundAccessories.push(accessory);
@@ -143,19 +134,19 @@ WinkPlatform.prototype = {
                             }
 
                         } else if (device.smoke_detector_id !== undefined)
-                            accessory = new WinkSmokeDetectorAccessory(that, device, Service, Characteristic, Accessory, uuid);
+                            accessory = new WinkSmokeDetectorAccessory(that, device);
 
                         else if (device.thermostat_id !== undefined)
-                            accessory = new WinkThermostatAccessory(that, device, Service, Characteristic, Accessory, uuid);
+                            accessory = new WinkThermostatAccessory(that, device);
 
                         else if (device.air_conditioner_id !== undefined)
-                            accessory = new WinkAirConditionerAccessory(that, device, Service, Characteristic, Accessory, uuid);
+                            accessory = new WinkAirConditionerAccessory(that, device);
 
                         else if (device.sensor_pod_id !== undefined)
-                            accessory = new WinkSensorAccessory(that, device, Service, Characteristic, Accessory, uuid);
+                            accessory = new WinkSensorAccessory(that, device);
 
 						else if (device.propane_tank_id !== undefined)
-                            accessory = new WinkPropaneTankAccessory(that, device, Service, Characteristic, Accessory, uuid);
+                            accessory = new WinkPropaneTankAccessory(that, device);
 
                         //These are here to prevent Unknown Device Groups in the logs when we know what the device is and can't represent it 
                         //with a HomeKit service yet.
@@ -191,99 +182,5 @@ WinkPlatform.prototype = {
                 });
             }
         });
-    },
-    UpdateWinkProperty_noFeedback: function(WinkAccessory, callback, sProperty, sTarget) {
-        this.log("Changing target property '" + sProperty + "' of the " + WinkAccessory.device.device_group + " called " + WinkAccessory.device.name + " to " + sTarget);
-        if (WinkAccessory.device.desired_state == undefined) {
-            callback(Error("Unsupported"));
-            return;
-        };
-
-
-        var myvariable = {
-            "desired_state": {}
-        };
-
-        if (sProperty instanceof Array) {
-            for (var i = 0; i < sProperty.length; i++) {
-                myvariable.desired_state[sProperty[i]] = sTarget[i];
-            }
-        } else {
-            if (WinkAccessory.device.desired_state[sProperty] == undefined) {
-                callback(Error("Unsupported"));
-                return;
-            };
-            myvariable.desired_state[sProperty] = sTarget;
-        }
-
-
-        WinkAccessory.control.update(myvariable, callback);
-
-    },
-    UpdateWinkProperty_withFeedback: function(WinkAccessory, callback, sProperty, sTarget) {
-        this.log("Changing target property '" + sProperty + "' of the " + WinkAccessory.device.device_group + " called " + WinkAccessory.device.name + " to " + sTarget);
-        if (WinkAccessory.device.desired_state == undefined) {
-            callback(Error("Unsupported"));
-            return;
-        };
-        if (WinkAccessory.device.desired_state[sProperty] == undefined) {
-            callback(Error("Unsupported"));
-            return;
-        };
-
-        var myvariable = {
-            "desired_state": {}
-        };
-        myvariable.desired_state[sProperty] = sTarget;
-        var that = this;
-        var update = function(retry) {
-            WinkAccessory.control.update(myvariable,
-                function(res) {
-                    var err = WinkAccessory.handleResponse(res);
-                    if (!err) {
-                        that.refreshUntil(WinkAccessory, 5,
-                            function(sProperty) {
-                                return WinkAccessory.device.last_reading[sProperty] == WinkAccessory.device.desired_state[sProperty];
-                            },
-                            function(completed, device, sProperty) {
-                                if (completed) {
-                                    that.log("Successfully changed target property '" + sProperty + "' of the " + WinkAccessory.device.device_group + " called " + WinkAccessory.device.name + " to " + sTarget);
-                                } else if (retry) {
-                                    that.log("Unable to determine if update was successful. Retrying update.");
-                                    retry();
-                                } else {
-                                    that.log("Unable to determine if update was successful.");
-                                }
-                            }, 1000, 500, sProperty);
-                    }
-                    if (callback) {
-                        callback(err);
-                        callback = null;
-                    }
-                });
-        };
-        update(update);
-    },
-    refreshUntil: function(that, maxTimes, predicate, callback, interval, incrementInterval, sProperty) {
-        if (!interval) {
-            interval = 500;
-        }
-        if (!incrementInterval) {
-            incrementInterval = 500;
-        }
-        setTimeout(function() {
-            that.control.refresh(function() {
-                if (predicate == undefined || predicate(sProperty) == true) {
-                    if (callback) callback(true, that.device, sProperty);
-                } else if (maxTimes > 0) {
-                    maxTimes = maxTimes - 1;
-                    interval += incrementInterval;
-                    that.platform.refreshUntil(that, maxTimes, predicate, callback, interval, incrementInterval, sProperty);
-                } else {
-                    if (callback) callback(false, that.device, sProperty);
-                }
-            });
-        }, interval);
     }
-
 };

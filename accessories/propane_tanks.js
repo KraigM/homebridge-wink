@@ -1,40 +1,33 @@
 var wink = require('wink-js');
 var inherits = require('util').inherits;
 
-var Service, Characteristic, Accessory, uuid;
+var WinkAccessory, Accessory, Service, Characteristic, uuid;
 
 /*
- *   Thermostat Accessory
+ *   Propane Tank Accessory
  */
 
-function WinkPropaneTankAccessory(platform, device, oService, oCharacteristic, oAccessory, ouuid) {
-    // Common Base Items
-    this.device = device;
-    this.name = device.name;
-    this.log = platform.log;
-    this.platform = platform;
-    this.deviceGroup = 'propane_tanks';
-    this.deviceId = this.device.propane_tank_id;
+module.exports = function(oWinkAccessory, oAccessory, oService, oCharacteristic, ouuid)
+{
+    if (oWinkAccessory) {
+        WinkAccessory = oWinkAccessory;
+        Accessory = oAccessory;
+        Service = oService;
+        Characteristic = oCharacteristic;
+        uuid = ouuid;
 
-    Service = oService;
-    Characteristic = oCharacteristic;
-    Accessory = oAccessory;
-    uuid = ouuid;
+        inherits(WinkPropaneTankAccessory, WinkAccessory);
+        WinkPropaneTankAccessory.prototype.loadData = loadData;
+        WinkPropaneTankAccessory.prototype.deviceGroup = 'propane_tanks';
+    }
+    return WinkPropaneTankAccessory;
+};
+module.exports.WinkPropaneTankAccessory = WinkPropaneTankAccessory;
 
-    var idKey = 'hbdev:wink:' + this.deviceGroup + ':' + this.deviceId;
-    var id = uuid.generate(idKey);
-    Accessory.call(this, this.name, id);
-    this.uuid_base = id;
+function WinkPropaneTankAccessory(platform, device) {
+    WinkAccessory.call(this, platform, device, device.propane_tank_id);
 
-    this.control = wink.device_group(this.deviceGroup).device_id(this.deviceId);
-
-    //this.log(idKey+' '+ JSON.stringify(device));
     var that = this;
-    // set some basic properties (these values are arbitrary and setting them is optional)
-    this
-        .getService(Service.AccessoryInformation)
-        .setCharacteristic(Characteristic.Manufacturer, this.device.device_manufacturer)
-        .setCharacteristic(Characteristic.Model, this.device.model_name);
 
     //The level of the propane tank is being expressed like a Battery because there isn't any other kind of tank level available in HomeKit.
     if (that.device.last_reading.battery !== undefined) {
@@ -56,32 +49,16 @@ function WinkPropaneTankAccessory(platform, device, oService, oCharacteristic, o
         this.getService(Service.BatteryService)
             .setCharacteristic(Characteristic.ChargingState, Characteristic.ChargingState.NOT_CHARGING);
     }
-    //End Battery Level Tracking   
+    //End Battery Level Tracking
+
+    this.loadData();
 }
 
-WinkPropaneTankAccessory.prototype = {
-    loadData: function() {
-            this.getService(Service.BatteryService)
-                .getCharacteristic(Characteristic.BatteryLevel)
-                .getValue();
-            this.getService(Service.BatteryService)
-                .getCharacteristic(Characteristic.StatusLowBattery)
-                .getValue();
-    },
-
-    getServices: function() {
-        return this.services;
-    },
-
-    handleResponse: function(res) {
-        if (!res) {
-            return Error("No response from Wink");
-        } else if (res.errors && res.errors.length > 0) {
-            return res.errors[0];
-        } else if (res.data) {
-            this.device = res.data;
-            this.loadData();
-        }
-    }
-}
-module.exports = WinkPropaneTankAccessory;
+var loadData = function() {
+        this.getService(Service.BatteryService)
+            .getCharacteristic(Characteristic.BatteryLevel)
+            .getValue();
+        this.getService(Service.BatteryService)
+            .getCharacteristic(Characteristic.StatusLowBattery)
+            .getValue();
+};

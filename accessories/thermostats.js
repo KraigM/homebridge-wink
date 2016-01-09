@@ -1,42 +1,33 @@
 var wink = require('wink-js');
 var inherits = require('util').inherits;
 
-var Service, Characteristic, Accessory, uuid;
+var WinkAccessory, Accessory, Service, Characteristic, uuid;
 
 /*
  *   Thermostat Accessory
  */
 
-function WinkThermostatAccessory(platform, device, oService, oCharacteristic, oAccessory, ouuid) {
-    // Common Base Items
-    this.device = device;
-    this.name = device.name;
-    this.log = platform.log;
-    this.platform = platform;
-    this.deviceGroup = 'thermostats';
-    this.deviceId = this.device.thermostat_id;
+module.exports = function(oWinkAccessory, oAccessory, oService, oCharacteristic, ouuid)
+{
+    if (oWinkAccessory) {
+        WinkAccessory = oWinkAccessory;
+        Accessory = oAccessory;
+        Service = oService;
+        Characteristic = oCharacteristic;
+        uuid = ouuid;
 
-    Service = oService;
-    Characteristic = oCharacteristic;
-    Accessory = oAccessory;
-    uuid = ouuid;
+        inherits(WinkThermostatAccessory, WinkAccessory);
+        WinkThermostatAccessory.prototype.loadData = loadData;
+        WinkThermostatAccessory.prototype.deviceGroup = 'thermostats';
+    }
+    return WinkThermostatAccessory;
+};
+module.exports.WinkThermostatAccessory = WinkThermostatAccessory;
 
-    var idKey = 'hbdev:wink:' + this.deviceGroup + ':' + this.deviceId;
-    var id = uuid.generate(idKey);
-    Accessory.call(this, this.name, id);
-    this.uuid_base = id;
+function WinkThermostatAccessory(platform, device) {
+    WinkAccessory.call(this, platform, device, device.thermostat_id);
 
-    this.control = wink.device_group(this.deviceGroup).device_id(this.deviceId);
-
-    //this.log(idKey+' '+ JSON.stringify(device));
     var that = this;
-    // set some basic properties (these values are arbitrary and setting them is optional)
-    this
-        .getService(Service.AccessoryInformation)
-        .setCharacteristic(Characteristic.Manufacturer, this.device.device_manufacturer)
-        .setCharacteristic(Characteristic.Model, this.device.model_name);
-
-    //Items specific to Thermostats:
 
     //Handle the Current State
     this
@@ -98,16 +89,16 @@ function WinkThermostatAccessory(platform, device, oService, oCharacteristic, oA
         .on('set', function(value, callback) {
             switch (value) {
                 case Characteristic.TargetHeatingCoolingState.COOL:
-                    platform.UpdateWinkProperty_noFeedback(that, callback, ["mode", "powered"], ["cool_only", true]);
+                    that.updatePropertyWithoutFeedback(callback, ["mode", "powered"], ["cool_only", true]);
                     break;
                 case Characteristic.TargetHeatingCoolingState.HEAT:
-                    platform.UpdateWinkProperty_noFeedback(that, callback, ["mode", "powered"], ["heat_only", true]);
+                    that.updatePropertyWithoutFeedback(callback, ["mode", "powered"], ["heat_only", true]);
                     break;
                 case Characteristic.TargetHeatingCoolingState.AUTO:
-                    platform.UpdateWinkProperty_noFeedback(that, callback, ["mode", "powered"], ["auto", true]);
+                    that.updatePropertyWithoutFeedback(callback, ["mode", "powered"], ["auto", true]);
                     break;
                 case Characteristic.TargetHeatingCoolingState.OFF:
-                    platform.UpdateWinkProperty_noFeedback(that, callback, "powered", false);
+                    that.updatePropertyWithoutFeedback(callback, "powered", false);
                     break;
             }
         });
@@ -126,7 +117,7 @@ function WinkThermostatAccessory(platform, device, oService, oCharacteristic, oA
             callback(null, that.device.desired_state.min_set_point);
         })
         .on('set', function(value, callback) {
-            platform.UpdateWinkProperty_noFeedback(that, callback, ["min_set_point", "max_set_point"], [value, value + 0.5555556]);
+            that.updatePropertyWithoutFeedback(callback, ["min_set_point", "max_set_point"], [value, value + 0.5555556]);
         });
 
     this
@@ -146,7 +137,7 @@ function WinkThermostatAccessory(platform, device, oService, oCharacteristic, oA
             callback(null, that.device.last_reading.min_set_point);
         })
         .on('set', function(value, callback) {
-            platform.UpdateWinkProperty_noFeedback(that, callback, "min_set_point", value);
+            that.updatePropertyWithoutFeedback(callback, "min_set_point", value);
         });
 
     this
@@ -156,7 +147,7 @@ function WinkThermostatAccessory(platform, device, oService, oCharacteristic, oA
             callback(null, that.device.last_reading.max_set_point);
         })
         .on('set', function(value, callback) {
-            platform.UpdateWinkProperty_noFeedback(that, callback, "max_set_point", value);
+            that.updatePropertyWithoutFeedback(callback, "max_set_point", value);
         });
 
     if (that.device.last_reading.humidity !== undefined)
@@ -187,76 +178,60 @@ function WinkThermostatAccessory(platform, device, oService, oCharacteristic, oA
         this.getService(Service.BatteryService)
             .setCharacteristic(Characteristic.ChargingState, Characteristic.ChargingState.NOT_CHARGING);
     }
-    //End Battery Level Tracking   
+    //End Battery Level Tracking
+
+    this.loadData();
 }
 
-WinkThermostatAccessory.prototype = {
-    loadData: function() {
+var loadData = function() {
+    this
+        .getService(Service.Thermostat)
+        .getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+        .getValue();
+
+    this
+        .getService(Service.Thermostat)
+        .getCharacteristic(Characteristic.TargetHeatingCoolingState)
+        .getValue();
+
+    this
+        .getService(Service.Thermostat)
+        .getCharacteristic(Characteristic.CurrentTemperature)
+        .getValue();
+
+    this
+        .getService(Service.Thermostat)
+        .getCharacteristic(Characteristic.TargetTemperature)
+        .getValue();
+
+    this
+        .getService(Service.Thermostat)
+        .getCharacteristic(Characteristic.TemperatureDisplayUnits)
+        .getValue();
+
+    this
+        .getService(Service.Thermostat)
+        .getCharacteristic(Characteristic.HeatingThresholdTemperature)
+        .getValue();
+
+    this
+        .getService(Service.Thermostat)
+        .getCharacteristic(Characteristic.CoolingThresholdTemperature)
+        .getValue();
+
+
+    if (this.device.last_reading.humidity !== undefined)
         this
-            .getService(Service.Thermostat)
-            .getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+        .getService(Service.Thermostat)
+        .getCharacteristic(Characteristic.CurrentRelativeHumidity)
+        .getValue();
+
+    if (this.device.last_reading.battery !== undefined) {
+        this.getService(Service.BatteryService)
+            .getCharacteristic(Characteristic.BatteryLevel)
             .getValue();
-
-        this
-            .getService(Service.Thermostat)
-            .getCharacteristic(Characteristic.TargetHeatingCoolingState)
+        this.getService(Service.BatteryService)
+            .getCharacteristic(Characteristic.StatusLowBattery)
             .getValue();
-
-        this
-            .getService(Service.Thermostat)
-            .getCharacteristic(Characteristic.CurrentTemperature)
-            .getValue();
-
-        this
-            .getService(Service.Thermostat)
-            .getCharacteristic(Characteristic.TargetTemperature)
-            .getValue();
-
-        this
-            .getService(Service.Thermostat)
-            .getCharacteristic(Characteristic.TemperatureDisplayUnits)
-            .getValue();
-
-        this
-            .getService(Service.Thermostat)
-            .getCharacteristic(Characteristic.HeatingThresholdTemperature)
-            .getValue();
-
-        this
-            .getService(Service.Thermostat)
-            .getCharacteristic(Characteristic.CoolingThresholdTemperature)
-            .getValue();
-
-
-        if (this.device.last_reading.humidity !== undefined)
-            this
-            .getService(Service.Thermostat)
-            .getCharacteristic(Characteristic.CurrentRelativeHumidity)
-            .getValue();
-
-        if (this.device.last_reading.battery !== undefined) {
-            this.getService(Service.BatteryService)
-                .getCharacteristic(Characteristic.BatteryLevel)
-                .getValue();
-            this.getService(Service.BatteryService)
-                .getCharacteristic(Characteristic.StatusLowBattery)
-                .getValue();
-        }
-    },
-
-    getServices: function() {
-        return this.services;
-    },
-
-    handleResponse: function(res) {
-        if (!res) {
-            return Error("No response from Wink");
-        } else if (res.errors && res.errors.length > 0) {
-            return res.errors[0];
-        } else if (res.data) {
-            this.device = res.data;
-            this.loadData();
-        }
     }
-}
-module.exports = WinkThermostatAccessory;
+};
