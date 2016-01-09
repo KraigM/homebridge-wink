@@ -47,7 +47,7 @@ function WinkPropaneTankAccessory(platform, device, oService, oCharacteristic, o
         this.getService(Service.BatteryService)
             .getCharacteristic(Characteristic.StatusLowBattery)
             .on('get', function(callback) {
-                if ((that.device.last_reading.battery < 0.25)||(that.device.last_reading.remaining < 0.25)) //Indicate Low Battery for the battery AND the propane level
+                if (that.device.last_reading.remaining < 0.25) //Indicate Low Battery for the battery AND the propane level
                     callback(null, Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW);
                 else
                     callback(null, Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL);

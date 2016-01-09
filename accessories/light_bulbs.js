@@ -58,15 +58,19 @@ function WinkLightAccessory(platform, device, oService, oCharacteristic, oAccess
         platform.UpdateWinkProperty_noFeedback(that, callback, "brightness", value/100);
       });
 
+  if (that.device.desired_state.color_model != undefined)
+        platform.UpdateWinkProperty_noFeedback(that, function(){ return 0; }, "color_model", "hsb");
+    
+
   if (that.device.desired_state.hue !== undefined)      
      this
       .getService(Service.Lightbulb)
       .getCharacteristic(Characteristic.Hue)
       .on('get', function(callback) {
-        callback(null, that.device.last_reading.hue);
+        callback(null, Math.floor(that.device.last_reading.hue*360));
       })
       .on('set', function(value, callback) {
-        platform.UpdateWinkProperty_noFeedback(that, callback, "hue", value);
+        platform.UpdateWinkProperty_noFeedback(that, callback, "hue", value/360);
       });
 
   if (that.device.desired_state.saturation !== undefined)      
@@ -74,10 +78,10 @@ function WinkLightAccessory(platform, device, oService, oCharacteristic, oAccess
       .getService(Service.Lightbulb)
       .getCharacteristic(Characteristic.Saturation)
       .on('get', function(callback) {
-        callback(null, that.device.last_reading.saturation);
+        callback(null, Math.floor(that.device.last_reading.saturation*100));
       })
       .on('set', function(value, callback) {
-        platform.UpdateWinkProperty_noFeedback(that, callback, "saturation", value);
+        platform.UpdateWinkProperty_noFeedback(that, callback, "saturation", value/100);
       });
 }
 
