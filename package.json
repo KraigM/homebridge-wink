@@ -1,7 +1,7 @@
 {
   "name": "homebridge-wink",
-  "description": "Legacy plugins for homebridge: https://github.com/nfarina/homebridge",
-  "version": "0.0.7",
+  "description": "HomeBridge plugin for the Wink hub",
+  "version": "0.0.6",
   "repository": {
     "type": "git",
     "url": "git://github.com/kraigm/homebridge-wink.git"
