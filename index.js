@@ -1,357 +1,191 @@
+//
 var wink = require('wink-js');
-var inherits = require('util').inherits;
 
 process.env.WINK_NO_CACHE = true;
 
 var Service, Characteristic, Accessory, uuid;
 
-module.exports = function(homebridge) {
-    Service = homebridge.hap.Service;
-    Characteristic = homebridge.hap.Characteristic;
-    Accessory = homebridge.hap.Accessory;
-    uuid = homebridge.hap.uuid;
+var WinkAccessory;
+var WinkLockAccessory;
+var WinkLightAccessory;
+var WinkSwitchAccessory;
+var WinkGarageDoorAccessory;
+var WinkOutletAccessory;
+var WinkSmokeDetectorAccessory;
+var WinkThermostatAccessory;
+var WinkAirConditionerAccessory;
+var WinkSensorAccessory;
+var WinkPropaneTankAccessory;
+var WinkSirenAccessory;
 
-    var copyInherit = function(orig, base){
-      var acc = orig.prototype;
-      inherits(orig, base);
-      orig.prototype.parent = base.prototype;
-      for (var mn in acc) {
-          orig.prototype[mn] = acc[mn];
-      }
-    };
+module.exports = function (homebridge) {
+	Service = homebridge.hap.Service;
+	Characteristic = homebridge.hap.Characteristic;
+	Accessory = homebridge.hap.Accessory;
+	uuid = homebridge.hap.uuid;
 
-    copyInherit(WinkAccessory, Accessory);
-    copyInherit(WinkLightAccessory, WinkAccessory);
-    copyInherit(WinkLockAccessory, WinkAccessory);
+	WinkAccessory = require('./lib/wink-accessory')(Accessory, Service, Characteristic, uuid);
+	WinkLockAccessory = require('./accessories/locks')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+	WinkLightAccessory = require('./accessories/light_bulbs')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+	WinkSwitchAccessory = require('./accessories/binary_switches')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+	WinkGarageDoorAccessory = require('./accessories/garage_doors')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+	WinkOutletAccessory = require('./accessories/outlets')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+	WinkSmokeDetectorAccessory = require('./accessories/smoke_detectors')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+	WinkThermostatAccessory = require('./accessories/thermostats')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+	WinkAirConditionerAccessory = require('./accessories/air_conditioners')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+	WinkSensorAccessory = require('./accessories/sensor_pods')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+	WinkPropaneTankAccessory = require('./accessories/propane_tanks')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+	WinkSirenAccessory = require('./accessories/sirens')(WinkAccessory, Accessory, Service, Characteristic, uuid);
 
-    homebridge.registerPlatform("homebridge-wink", "Wink", WinkPlatform);
+	homebridge.registerPlatform("homebridge-wink", "Wink", WinkPlatform);
 };
 
-var model = {
-  light_bulbs: require('wink-js/lib/model/light'),
-  refreshUntil: function(that, maxTimes, predicate, callback, interval, incrementInterval) {
-    if (!interval) {
-      interval = 500;
-    }
-    if (!incrementInterval) {
-      incrementInterval = 500;
-    }
-    setTimeout(function() {
-      that.reloadData(function() {
-        if (predicate == undefined || predicate(that.device) == true) {
-          if (callback) callback(true);
-        } else if (maxTimes > 0) {
-          maxTimes = maxTimes - 1;
-          interval += incrementInterval;
-          model.refreshUntil(that, maxTimes, predicate, callback, interval, incrementInterval);
-        } else {
-          if (callback) callback(false);
-        }
-      });
-    }, interval);
-  }
-};
+function WinkPlatform(log, config) {
+	// Load Wink Authentication From Config File
+	this.client_id = config["client_id"];
+	this.client_secret = config["client_secret"];
 
-function WinkPlatform(log, config){
+	this.username = config["username"];
+	this.password = config["password"];
 
-  // auth info
-  this.client_id = config["client_id"];
-  this.client_secret = config["client_secret"];
+	// Load Groups or IDs that should be hidden from the Config File.
+	this.hidegroups = config["hide_groups"];
+	this.hideids = config["hide_ids"];
+	if (this.hidegroups == undefined) this.hidegroups = [];
+	if (this.hideids == undefined) this.hideids = [];
 
-  this.username = config["username"];
-  this.password = config["password"];
+	// If this is true then devices that the Wink hub cannot communicate with will not be registered.
+	// In addition, any devices that lose communication will be unregistered which will allow HomeKit to know the device is not accessible.
+	this.unregister_disconnected = config["unregister_disconnected"] | false;
 
-  this.log = log;
-  this.deviceLookup = {};
+	//For Temperatures, what Display unit should we report (C or F)
+	this.temperature_unit = config["temperature_unit"];
+	if (this.temperature_unit === undefined) this.temperature_unit = "F";
+
+	this.log = log;
+	this.deviceLookup = {};
 }
 
 WinkPlatform.prototype = {
-  reloadData: function(callback) {
-    this.log("Refreshing Wink Data");
-    var that = this;
-    wink.user().devices(function(devices) {
-      if (devices && devices.data && devices.data instanceof Array) {
-        for (var i=0; i<devices.data.length; i++){
-          var device = devices.data[i];
-          var accessory = that.deviceLookup[device.lock_id | device.light_bulb_id | ""];
-          if (accessory != undefined) {
-            accessory.device = device;
-            accessory.loadData();
-          }
-        }
-      }
-      if (callback) callback();
-    });
-  },
-  accessories: function(callback) {
-    this.log("Fetching Wink devices.");
+	reloadData: function (callback) {
+		//This is called when we need to refresh all Wink device information.
+		this.log("Refreshing Wink Data");
+		var that = this;
+		wink.user().devices(function (devices) { //TODO: Add the ability to detect new devices and unregister newly disconnected devices.
+			if (devices && devices.data && devices.data instanceof Array) {
+				for (var i = 0; i < devices.data.length; i++) {
+					var device = devices.data[i];
+					//NEWMODULE: Add the id here. I'm planning to redesign this section.
+					var accessory = that.deviceLookup[device.lock_id | device.light_bulb_id | device.binary_switch_id | device.garage_door_id | device.outlet_id | device.smoke_detector_id | device.thermostat_id | device.air_conditioner_id | device.sensor_pod_id | device.propane_tank_id | device.siren_id | ""];
+					if (accessory != undefined) {
+						accessory.device = device;
+						accessory.loadData();
+					}
+				}
+			}
+			if (callback) callback();
+		});
+	},
+	accessories: function (callback) {
+		this.log("Fetching Wink devices.");
 
-    var that = this;
-    var foundAccessories = [];
-    this.deviceLookup = {};
+		var that = this;
+		var foundAccessories = [];
+		this.deviceLookup = {};
 
-    var refreshLoop = function(){
-      setInterval(that.reloadData.bind(that), 30000);
-    };
+		var refreshLoop = function () {
+			setInterval(that.reloadData.bind(that), 30000);
+		};
 
-    wink.init({
-        "client_id": this.client_id,
-        "client_secret": this.client_secret,
-        "username": this.username,
-        "password": this.password
-    }, function(auth_return) {
-      if ( auth_return === undefined ) {
-        that.log("There was a problem authenticating with Wink.");
-      } else {
-        // success
-        wink.user().devices(function(devices) {
-          for (var i=0; i<devices.data.length; i++){
-            var device = devices.data[i];
-            var accessory = null;
-            if (device.light_bulb_id !== undefined) {
-              accessory = new WinkLightAccessory(that.log, device);
-            } else if (device.lock_id !== undefined) {
-              accessory = new WinkLockAccessory(that.log, device);
-            }
-            if (accessory != undefined) {
-              that.deviceLookup[accessory.deviceId] = accessory;
-              foundAccessories.push(accessory);
-            }
-          }
-          refreshLoop();
-          callback(foundAccessories);
-        });
-      }
-    });
-  }
-};
+		wink.init({
+			"client_id": this.client_id,
+			"client_secret": this.client_secret,
+			"username": this.username,
+			"password": this.password
+		}, function (auth_return) {
+			if (auth_return === undefined) {
+				that.log("There was a problem authenticating with Wink.");
+			} else {
+				// success
+				wink.user().devices(function (devices) {
+					for (var i = 0; i < devices.data.length; i++) {
+						var device = devices.data[i];
+						var accessory = null;
+						//Get Device Type
+						//NEWMODULE: Add Appropriate Lines Here
+						if (device.light_bulb_id !== undefined)
+							accessory = new WinkLightAccessory(that, device);
 
+						else if (device.garage_door_id !== undefined)
+							accessory = new WinkGarageDoorAccessory(that, device);
 
-/*
- *   Base Accessory
- */
+						else if (device.lock_id !== undefined)
+							accessory = new WinkLockAccessory(that, device);
 
-function WinkAccessory(log, device, type, typeId) {
-  // construct base
-  this.device = device;
-  this.name = device.name;
-  this.log = log;
-  if (typeId == undefined) {
-    typeId = this.name;
-    log("WARN: Unable to find id of " + this.name + " so using name instead");
-  }
-  this.deviceGroup = type + 's';
-  this.deviceId = typeId;
-  var idKey = 'hbdev:wink:' + type + ':' + typeId;
-  var id = uuid.generate(idKey);
-  Accessory.call(this, this.name, id);
-  this.uuid_base = id;
+						else if (device.binary_switch_id !== undefined)
+							accessory = new WinkSwitchAccessory(that, device);
 
-  this.control = wink.device_group(this.deviceGroup).device_id(this.deviceId);
+						else if (device.powerstrip_id !== undefined) {
+							for (var j = 0; j < device.outlets.length; j++) {
+								accessory = new WinkOutletAccessory(that, device.outlets[j]);
+								if (accessory != undefined) {
+									that.deviceLookup[accessory.deviceId] = accessory;
+									foundAccessories.push(accessory);
+								}
+								accessory = undefined;
+							}
 
-  // set some basic properties (these values are arbitrary and setting them is optional)
-  this
-      .getService(Service.AccessoryInformation)
-      .setCharacteristic(Characteristic.Manufacturer, this.device.device_manufacturer)
-      .setCharacteristic(Characteristic.Model, this.device.model_name);
+						} else if (device.smoke_detector_id !== undefined)
+							accessory = new WinkSmokeDetectorAccessory(that, device);
 
-  WinkAccessory.prototype.loadData.call(this);
-}
+						else if (device.thermostat_id !== undefined)
+							accessory = new WinkThermostatAccessory(that, device);
 
-WinkAccessory.prototype.getServices = function() {
-  return this.services;
-};
+						else if (device.air_conditioner_id !== undefined)
+							accessory = new WinkAirConditionerAccessory(that, device);
 
-WinkAccessory.prototype.loadData = function() {
-};
+						else if (device.sensor_pod_id !== undefined)
+							accessory = new WinkSensorAccessory(that, device);
 
-WinkAccessory.prototype.handleResponse = function(res) {
-  if (!res) {
-    return Error("No response from Wink");
-  } else if (res.errors && res.errors.length > 0) {
-    return res.errors[0];
-  } else if (res.data) {
-    this.device = res.data;
-    this.loadData();
-  }
-};
+						else if (device.propane_tank_id !== undefined)
+							accessory = new WinkPropaneTankAccessory(that, device);
 
-WinkAccessory.prototype.reloadData = function(callback){
-  var that = this;
-  this.control.get(function(res) {
-    callback(that.handleResponse(res));
-  });
-};
+						else if (device.siren_id !== undefined)
+							accessory = new WinkSirenAccessory(that, device);
 
+						//These are here to prevent Unknown Device Groups in the logs when we know what the device is and can't represent it
+						//with a HomeKit service yet.
+						else if (device.manufacturer_device_model = "wink_hub")
+							that.log("Device Ignored Not In HomeKit - Group hubs, ID " + device.hub_id + ", Name " + device.name);
+						else if (device.remote_id !== undefined)
+							that.log("Device Ignored Not In HomeKit - Group remotes, ID " + device.remote_id + ", Name " + device.name);
+						else if (device.unknown_device_id !== undefined)
+							that.log("Device Ignored Not In HomeKit - Group unknown_devices, ID " + device.unknown_device_id + ", Name " + device.name);
+						else if (device.eggtray_id !== undefined)
+							that.log("Device Ignored Not In HomeKit - Group eggtrays, ID " + device.eggtray_id + ", Name " + device.name);
+						else if (device.piggy_bank_id !== undefined)
+							that.log("Device Ignored Not In HomeKit - Group piggy_banks, ID " + device.piggy_bank_id + ", Name " + device.name);
 
-/*
- *   Light Accessory
- */
+						else that.log("Unknown Device Group: " + JSON.stringify(device));
 
-function WinkLightAccessory(log, device) {
-  // construct base
-  WinkAccessory.call(this, log, device, 'light_bulb', device.light_bulb_id);
-
-  // accessor
-  var that = this;
-
-  that.device = device;
-  that.deviceControl = model.light_bulbs(device, wink);
-
-  this
-      .addService(Service.Lightbulb)
-      .getCharacteristic(Characteristic.On)
-      .on('get', function(callback) {
-        var powerState = that.device.desired_state.powered;
-        that.log("power state for " + that.name + " is: " + powerState);
-        callback(null, powerState != undefined ? powerState : false);
-      })
-      .on('set', function(powerOn, callback) {
-        if (powerOn) {
-          that.log("Setting power state on the '"+that.name+"' to on");
-          that.deviceControl.power.on(function(response) {
-            if (response === undefined) {
-              that.log("Error setting power state on the '"+that.name+"'");
-              callback(Error("Error setting power state on the '"+that.name+"'"));
-            } else {
-              that.log("Successfully set power state on the '"+that.name+"' to on");
-              callback(null, powerOn);
-            }
-          });
-        }else{
-          that.log("Setting power state on the '"+that.name+"' to off");
-          that.deviceControl.power.off(function(response) {
-            if (response === undefined) {
-              that.log("Error setting power state on the '"+that.name+"'");
-              callback(Error("Error setting power state on the '"+that.name+"'"));
-            } else {
-              that.log("Successfully set power state on the '"+that.name+"' to off");
-              callback(null, powerOn);
-            }
-          });
-        }
-      });
-
-  this
-      .getService(Service.Lightbulb)
-      .getCharacteristic(Characteristic.Brightness)
-      .on('get', function(callback) {
-        var level = that.device.desired_state.brightness * 100;
-        that.log("brightness level for " + that.name + " is: " + level);
-        callback(null, level);
-      })
-      .on('set', function(level, callback) {
-        that.log("Setting brightness on the '"+this.name+"' to " + level);
-        that.deviceControl.brightness(level, function(response) {
-          if (response === undefined) {
-            that.log("Error setting brightness on the '"+that.name+"'");
-            callback(Error("Error setting brightness on the '"+that.name+"'"));
-          } else {
-            that.log("Successfully set brightness on the '"+that.name+"' to " + level);
-            callback(null, level);
-          }
-        });
-      });
-
-  WinkLightAccessory.prototype.loadData.call(this);
-}
-
-WinkLightAccessory.prototype.loadData = function() {
-  this.parent.loadData.call(this);
-  this.getService(Service.Lightbulb)
-      .getCharacteristic(Characteristic.On)
-      .getValue();
-  this.getService(Service.Lightbulb)
-      .getCharacteristic(Characteristic.Brightness)
-      .getValue();
-};
-
-
-/*
- *   Lock Accessory
- */
-
-function WinkLockAccessory(log, device) {
-  // construct base
-  WinkAccessory.call(this, log, device, 'lock', device.lock_id);
-
-  // accessor
-  var that = this;
-
-  this
-      .addService(Service.LockMechanism)
-      .getCharacteristic(Characteristic.LockTargetState)
-      .on('get', function(callback) {
-        callback(null, that.isLockTarget());
-      })
-      .on('set', function(value, callback) {
-        var locked = that.fromLockState(value);
-
-        if (locked == undefined) {
-          callback(Error("Unsupported"));
-          return;
-        }
-
-        that.log("Changing target lock state of " + that.name + " to " + (locked ? "locked" : "unlocked"));
-
-        var update = function(retry) {
-          that.control.update({ "desired_state": { "locked": locked } }, function(res) {
-            var err = that.handleResponse(res);
-            if (!err) {
-              model.refreshUntil(that, 5,
-                  function() { return that.isLocked() == that.isLockTarget(); },
-                  function(completed) {
-                    if (completed) {
-                      that.log("Successfully changed lock status to " + (that.isLocked() ? "locked" : "unlocked"));
-                    } else if (retry) {
-                      that.log("Unable to determine if update was successful. Retrying update.");
-                      retry();
-                    } else {
-                      that.log("Unable to determine if update was successful.");
-                    }
-                  });
-            }
-            if (callback)
-            {
-              callback(err);
-              callback = null;
-            }
-          });
-        };
-        update(update);
-      });
-
-  WinkLockAccessory.prototype.loadData.call(this);
-}
-
-WinkLockAccessory.prototype.loadData = function() {
-  this.parent.loadData.call(this);
-  this.getService(Service.LockMechanism)
-      .setCharacteristic(Characteristic.LockCurrentState, this.isLocked());
-  this.getService(Service.LockMechanism)
-      .getCharacteristic(Characteristic.LockTargetState)
-      .getValue();
-};
-
-WinkLockAccessory.prototype.toLockState= function(isLocked) {
-  return isLocked  ? Characteristic.LockCurrentState.SECURED : Characteristic.LockCurrentState.UNSECURED;
-};
-
-WinkLockAccessory.prototype.fromLockState= function(lockState) {
-  switch (lockState) {
-    case Characteristic.LockCurrentState.SECURED:
-      return true;
-    case Characteristic.LockCurrentState.UNSECURED:
-      return false;
-    default:
-      return undefined;
-  }
-};
-
-WinkLockAccessory.prototype.isLockTarget= function() {
-  return this.toLockState(this.device.desired_state.locked);
-};
-
-WinkLockAccessory.prototype.isLocked= function() {
-  return this.toLockState(this.device.last_reading.locked);
+						if (accessory != undefined) {
+							if (that.hidegroups.indexOf(accessory.deviceGroup) >= 0) { //Make sure the group isn't supposed to be hidden
+								that.log("Device Ignored By Group - Group " + accessory.deviceGroup + ", ID " + accessory.deviceId + ", Name " + accessory.name);
+							} else if (that.hideids.indexOf(accessory.deviceId) >= 0) { //Make sure the ID isn't supposed to be hidden
+								that.log("Device Ignored By ID - Group " + accessory.deviceGroup + ", ID " + accessory.deviceId + ", Name " + accessory.name);
+							} else if (that.unregister_disconnected && !accessory.device.last_reading.connection) {
+								that.log("Device Ignored By Disconnection - Group " + accessory.deviceGroup + ", ID " + accessory.deviceId + ", Name " + accessory.name);
+							} else {
+								that.log("Device Added - Group " + accessory.deviceGroup + ", ID " + accessory.deviceId + ", Name " + accessory.name);
+								that.deviceLookup[accessory.deviceId] = accessory;
+								foundAccessories.push(accessory);
+							}
+						}
+					}
+					refreshLoop();
+					callback(foundAccessories);
+				});
+			}
+		});
+	}
 };

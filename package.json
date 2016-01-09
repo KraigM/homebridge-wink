@@ -10,13 +10,13 @@
   "preferGlobal": true,
   "keywords": [
     "homebridge-plugin",
-    "wink"
+	"wink"
   ],
   "engines": {
     "node": ">=0.12.0",
     "homebridge": ">=0.2.5"
   },
   "dependencies": {
-    "wink-js": "0.0.5"
+    "wink-js": "0.0.9"
   }
 }
