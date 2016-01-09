@@ -30,10 +30,10 @@ Configuration sample:
 
 Fields: 
 
-* "platform": Must always be "Nest" (required)
+* "platform": Must always be "Wink" (required)
 * "name": Can be anything (required)
-* "client_id": Wink API client id, must be obtained from questions@quirky.com (required)
-* "client_secret": Wink API client id, must be obtained from questions@quirky.com (required)
+* "client_id": Wink API client id, must be obtained from questions@wink.com (required)
+* "client_secret": Wink API client id, must be obtained from questions@wink.com (required)
 * "username": Wink login username, same as app (required)
 * "password": Wink login password, same as app (required)
 
