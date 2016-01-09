@@ -21,7 +21,7 @@ module.exports = function (oWinkAccessory, oAccessory, oService, oCharacteristic
 	}
 	return WinkLightAccessory;
 };
-module.exports.WinkGarageDoorAccessory = WinkLightAccessory;
+module.exports.WinkLightAccessory = WinkLightAccessory;
 
 function WinkLightAccessory(platform, device) {
 	WinkAccessory.call(this, platform, device, device.light_bulb_id);
