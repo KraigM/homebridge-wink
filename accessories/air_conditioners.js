@@ -54,8 +54,6 @@ function WinkAirConditionerAccessory(platform, device) {
 				callback(null, Characteristic.CurrentHeatingCoolingState.OFF);
 		});
 
-	//Handle the Target State
-	//Handle the Current State
 	this
 		.getService(Service.Thermostat)
 		.getCharacteristic(Characteristic.TargetHeatingCoolingState)
@@ -116,6 +114,16 @@ function WinkAirConditionerAccessory(platform, device) {
 				callback(null, Characteristic.TemperatureDisplayUnits.FAHRENHEIT);
 		});
 
+	this
+		.getService(Service.Thermostat)
+		.addCharacteristic(Characteristic.RotationSpeed)
+		.on('get', function (callback) {
+			callback(null, Math.floor(that.device.last_reading.fan_speed * 100));
+		})
+		.on('set', function (value, callback) {
+			that.updatePropertyWithoutFeedback(callback, "fan_speed", value / 100);
+		});
+
 	this.loadData();
 }
 
@@ -143,6 +151,11 @@ var loadData = function () {
 	this
 		.getService(Service.Thermostat)
 		.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+		.getValue();
+
+	this
+		.getService(Service.Thermostat)
+		.getCharacteristic(Characteristic.RotationSpeed)
 		.getValue();
 
 };

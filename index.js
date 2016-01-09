@@ -16,6 +16,7 @@ var WinkThermostatAccessory;
 var WinkAirConditionerAccessory;
 var WinkSensorAccessory;
 var WinkPropaneTankAccessory;
+var WinkSirenAccessory;
 
 module.exports = function (homebridge) {
 	Service = homebridge.hap.Service;
@@ -34,6 +35,7 @@ module.exports = function (homebridge) {
 	WinkAirConditionerAccessory = require('./accessories/air_conditioners')(WinkAccessory, Accessory, Service, Characteristic, uuid);
 	WinkSensorAccessory = require('./accessories/sensor_pods')(WinkAccessory, Accessory, Service, Characteristic, uuid);
 	WinkPropaneTankAccessory = require('./accessories/propane_tanks')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+	WinkSirenAccessory = require('./accessories/sirens')(WinkAccessory, Accessory, Service, Characteristic, uuid);
 
 	homebridge.registerPlatform("homebridge-wink", "Wink", WinkPlatform);
 };
@@ -74,7 +76,7 @@ WinkPlatform.prototype = {
 				for (var i = 0; i < devices.data.length; i++) {
 					var device = devices.data[i];
 					//NEWMODULE: Add the id here. I'm planning to redesign this section.
-					var accessory = that.deviceLookup[device.lock_id | device.light_bulb_id | device.binary_switch_id | device.garage_door_id | device.outlet_id | device.smoke_detector_id | device.thermostat_id | device.air_conditioner_id | device.sensor_pod_id | device.propane_tank_id | ""];
+					var accessory = that.deviceLookup[device.lock_id | device.light_bulb_id | device.binary_switch_id | device.garage_door_id | device.outlet_id | device.smoke_detector_id | device.thermostat_id | device.air_conditioner_id | device.sensor_pod_id | device.propane_tank_id | device.siren_id | ""];
 					if (accessory != undefined) {
 						accessory.device = device;
 						accessory.loadData();
@@ -147,6 +149,9 @@ WinkPlatform.prototype = {
 
 						else if (device.propane_tank_id !== undefined)
 							accessory = new WinkPropaneTankAccessory(that, device);
+
+						else if (device.siren_id !== undefined)
+							accessory = new WinkSirenAccessory(that, device);
 
 						//These are here to prevent Unknown Device Groups in the logs when we know what the device is and can't represent it
 						//with a HomeKit service yet.
