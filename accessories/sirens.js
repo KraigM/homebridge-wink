@@ -48,18 +48,18 @@ function WinkSirenAccessory(platform, device) {
 		.on('set', function (value, callback) {
 			if (value) {
 				if (!that.device.last_reading.powered)
-					that.updatePropertyWithoutFeedback(callback, ["powered", "mode"], [true, "strobe_only"]);
+					that.updateWinkProperty(callback, ["powered", "mode"], [true, "strobe_only"]);
 				else if (that.device.last_reading.mode == 'siren_only')
-					that.updatePropertyWithoutFeedback(callback, ["powered", "mode"], [true, "siren_and_strobe"]);
+					that.updateWinkProperty(callback, ["powered", "mode"], [true, "siren_and_strobe"]);
 				else
-					that.updatePropertyWithoutFeedback(callback, ["powered", "mode"], [true, "strobe_only"]);
+					that.updateWinkProperty(callback, ["powered", "mode"], [true, "strobe_only"]);
 			} else {
 				if (that.device.last_reading.powered)
-					that.updatePropertyWithoutFeedback(callback, "powered", false);
+					that.updateWinkProperty(callback, "powered", false);
 				else if (that.device.last_reading.mode == "siren_and_strobe")
-					that.updatePropertyWithoutFeedback(callback, "mode", "siren_only");
+					that.updateWinkProperty(callback, "mode", "siren_only");
 				else
-					that.updatePropertyWithoutFeedback(callback, "powered", false);
+					that.updateWinkProperty(callback, "powered", false);
 			}
 		});
 
@@ -83,18 +83,18 @@ function WinkSirenAccessory(platform, device) {
 		.on('set', function (value, callback) {
 			if (value) {
 				if (!that.device.last_reading.powered)
-					that.updatePropertyWithoutFeedback(callback, ["powered", "mode"], [true, "siren_only"]);
+					that.updateWinkProperty(callback, ["powered", "mode"], [true, "siren_only"]);
 				else if (that.device.last_reading.mode == 'siren_only')
-					that.updatePropertyWithoutFeedback(callback, ["powered", "mode"], [true, "siren_and_strobe"]);
+					that.updateWinkProperty(callback, ["powered", "mode"], [true, "siren_and_strobe"]);
 				else
-					that.updatePropertyWithoutFeedback(callback, ["powered", "mode"], [true, "siren_only"]);
+					that.updateWinkProperty(callback, ["powered", "mode"], [true, "siren_only"]);
 			} else {
 				if (that.device.last_reading.powered)
-					that.updatePropertyWithoutFeedback(callback, "powered", false);
+					that.updateWinkProperty(callback, "powered", false);
 				else if (that.device.last_reading.mode == "siren_and_strobe")
-					that.updatePropertyWithoutFeedback(callback, "mode", "strobe_only");
+					that.updateWinkProperty(callback, "mode", "strobe_only");
 				else
-					that.updatePropertyWithoutFeedback(callback, "powered", false);
+					that.updateWinkProperty(callback, "powered", false);
 			}
 		});
 

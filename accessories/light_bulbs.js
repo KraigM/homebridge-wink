@@ -1,5 +1,7 @@
 var wink = require('wink-js');
 var inherits = require('util').inherits;
+var events = require('events');
+var eventEmitter = new events.EventEmitter();
 
 var WinkAccessory, Accessory, Service, Characteristic, uuid;
 
@@ -36,7 +38,7 @@ function WinkLightAccessory(platform, device) {
 			callback(null, that.device.last_reading.powered);
 		})
 		.on('set', function (value, callback) {
-			that.updatePropertyWithoutFeedback(callback, "powered", value);
+			that.updateWinkProperty(callback, "powered", value);
 		});
 
 	if (that.device.desired_state.brightness !== undefined)
@@ -47,13 +49,13 @@ function WinkLightAccessory(platform, device) {
 				callback(null, Math.floor(that.device.last_reading.brightness * 100));
 			})
 			.on('set', function (value, callback) {
-				that.updatePropertyWithoutFeedback(callback, "brightness", value / 100);
+				that.updateWinkProperty(callback, "brightness", value / 100);
 			});
 
 	if (that.device.desired_state.color_model != undefined)
-		that.updatePropertyWithoutFeedback(function () {
+		that.updateWinkProperty(function () {
 			return 0;
-		}, "color_model", "hsb");
+		}, "color_model", "hsb", true);
 
 
 	if (that.device.desired_state.hue !== undefined)
@@ -64,7 +66,7 @@ function WinkLightAccessory(platform, device) {
 				callback(null, Math.floor(that.device.last_reading.hue * 360));
 			})
 			.on('set', function (value, callback) {
-				that.updatePropertyWithoutFeedback(callback, "hue", value / 360);
+				that.updateWinkProperty(callback, "hue", value / 360);
 			});
 
 	if (that.device.desired_state.saturation !== undefined)
@@ -75,7 +77,7 @@ function WinkLightAccessory(platform, device) {
 				callback(null, Math.floor(that.device.last_reading.saturation * 100));
 			})
 			.on('set', function (value, callback) {
-				that.updatePropertyWithoutFeedback(callback, "saturation", value / 100);
+				that.updateWinkProperty(callback, "saturation", value / 100);
 			});
 
 	this.loadData();

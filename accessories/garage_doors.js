@@ -39,9 +39,9 @@ function WinkGarageDoorAccessory(platform, device) {
 		})
 		.on('set', function (value, callback) {
 			if (value == Characteristic.TargetDoorState.OPEN)
-				that.updatePropertyWithFeedback(callback, "position", 1);
+				that.updateWinkProperty(callback, "position", 1);
 			else if (value == Characteristic.TargetDoorState.CLOSED)
-				that.updatePropertyWithFeedback(callback, "position", 0);
+				that.updateWinkProperty(callback, "position", 0);
 		});
 
 	this

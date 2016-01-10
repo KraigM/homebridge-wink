@@ -76,13 +76,13 @@ function WinkAirConditionerAccessory(platform, device) {
 		.on('set', function (value, callback) {
 			switch (value) {
 				case Characteristic.TargetHeatingCoolingState.COOL:
-					that.updatePropertyWithoutFeedback(callback, ["powered", "mode"], [true, "cool_only"]);
+					that.updateWinkProperty(callback, ["powered", "mode"], [true, "cool_only"]);
 					break;
 				case Characteristic.TargetHeatingCoolingState.AUTO:
-					that.updatePropertyWithoutFeedback(callback, ["powered", "mode"], [true, "auto_eco"]);
+					that.updateWinkProperty(callback, ["powered", "mode"], [true, "auto_eco"]);
 					break;
 				case Characteristic.TargetHeatingCoolingState.OFF:
-					that.updatePropertyWithoutFeedback(callback, "powered", false);
+					that.updateWinkProperty(callback, "powered", false);
 					break;
 			}
 		});
@@ -101,7 +101,7 @@ function WinkAirConditionerAccessory(platform, device) {
 			callback(null, that.device.desired_state.max_set_point);
 		})
 		.on('set', function (value, callback) {
-			that.updatePropertyWithoutFeedback(callback, "max_set_point", value);
+			that.updateWinkProperty(callback, "max_set_point", value);
 		});
 
 	this
@@ -121,7 +121,7 @@ function WinkAirConditionerAccessory(platform, device) {
 			callback(null, Math.floor(that.device.last_reading.fan_speed * 100));
 		})
 		.on('set', function (value, callback) {
-			that.updatePropertyWithoutFeedback(callback, "fan_speed", value / 100);
+			that.updateWinkProperty(callback, "fan_speed", value / 100);
 		});
 
 	this.loadData();
