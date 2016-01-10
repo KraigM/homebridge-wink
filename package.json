@@ -1,7 +1,7 @@
 {
 	"name": "homebridge-wink",
 	"description": "HomeBridge plugin for the Wink hub",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"repository": {
 		"type": "git",
 		"url": "git://github.com/kraigm/homebridge-wink.git"
@@ -10,7 +10,7 @@
 	"preferGlobal": true,
 	"keywords": [
 		"homebridge-plugin",
-	"wink"
+		"wink"
 	],
 	"engines": {
 		"node": ">=0.12.0",

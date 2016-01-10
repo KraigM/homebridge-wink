@@ -87,16 +87,16 @@ function WinkThermostatAccessory(platform, device) {
 		.on('set', function (value, callback) {
 			switch (value) {
 				case Characteristic.TargetHeatingCoolingState.COOL:
-					that.updatePropertyWithoutFeedback(callback, ["mode", "powered"], ["cool_only", true]);
+					that.updateWinkProperty(callback, ["mode", "powered"], ["cool_only", true]);
 					break;
 				case Characteristic.TargetHeatingCoolingState.HEAT:
-					that.updatePropertyWithoutFeedback(callback, ["mode", "powered"], ["heat_only", true]);
+					that.updateWinkProperty(callback, ["mode", "powered"], ["heat_only", true]);
 					break;
 				case Characteristic.TargetHeatingCoolingState.AUTO:
-					that.updatePropertyWithoutFeedback(callback, ["mode", "powered"], ["auto", true]);
+					that.updateWinkProperty(callback, ["mode", "powered"], ["auto", true]);
 					break;
 				case Characteristic.TargetHeatingCoolingState.OFF:
-					that.updatePropertyWithoutFeedback(callback, "powered", false);
+					that.updateWinkProperty(callback, "powered", false);
 					break;
 			}
 		});
@@ -115,7 +115,7 @@ function WinkThermostatAccessory(platform, device) {
 			callback(null, that.device.desired_state.min_set_point);
 		})
 		.on('set', function (value, callback) {
-			that.updatePropertyWithoutFeedback(callback, ["min_set_point", "max_set_point"], [value, value + 0.5555556]);
+			that.updateWinkProperty(callback, ["min_set_point", "max_set_point"], [value, value + 0.5555556]);
 		});
 
 	this
@@ -135,7 +135,7 @@ function WinkThermostatAccessory(platform, device) {
 			callback(null, that.device.last_reading.min_set_point);
 		})
 		.on('set', function (value, callback) {
-			that.updatePropertyWithoutFeedback(callback, "min_set_point", value);
+			that.updateWinkProperty(callback, "min_set_point", value);
 		});
 
 	this
@@ -145,7 +145,7 @@ function WinkThermostatAccessory(platform, device) {
 			callback(null, that.device.last_reading.max_set_point);
 		})
 		.on('set', function (value, callback) {
-			that.updatePropertyWithoutFeedback(callback, "max_set_point", value);
+			that.updateWinkProperty(callback, "max_set_point", value);
 		});
 
 	if (that.device.last_reading.humidity !== undefined)
