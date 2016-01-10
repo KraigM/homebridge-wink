@@ -37,7 +37,7 @@ function WinkOutletAccessory(platform, device) {
 			callback(null, that.device.last_reading.powered);
 		})
 		.on('set', function (value, callback) {
-			that.updatePropertyWithoutFeedback(callback, "powered", value);
+			that.updateWinkProperty(callback, "powered", value);
 		});
 	this
 		.getService(Service.Outlet)

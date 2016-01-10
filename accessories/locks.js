@@ -68,10 +68,10 @@ function WinkLockAccessory(platform, device) {
 		.on('set', function (value, callback) {
 			switch (value) {
 				case Characteristic.LockTargetState.SECURED:
-					that.updatePropertyWithFeedback(callback, "locked", true);
+					that.updateWinkProperty(callback, "locked", true);
 					break;
 				case Characteristic.LockTargetState.UNSECURED:
-					that.updatePropertyWithFeedback(callback, "locked", false);
+					that.updateWinkProperty(callback, "locked", false);
 					break;
 			}
 		});
