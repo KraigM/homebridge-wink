@@ -17,6 +17,6 @@
 		"homebridge": ">=0.2.5"
 	},
 	"dependencies": {
-		"wink-js": ">=0.1.0 <2.0.0"
+		"wink-js": ">=0.1.0 <1.0.0"
 	}
 }
