@@ -68,12 +68,7 @@ function WinkPlatform(log, config) {
 	this.windowsensors = config["window_ids"];
 	if (this.windowsensors == undefined) this.windowsensors = [];
 
-	//This allows the garage to be represented as a switch.
-	//This is not secure because Siri will allow toggling it without unlocking the phone.
-	this.garage_lowsecurity = config["garage_lowsecurity"];
-	if (this.garage_lowsecurity == undefined) this.garage_lowsecurity = false;
-
-
+	
 	this.log = log;
 	this.deviceLookup = {};
 }
