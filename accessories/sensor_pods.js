@@ -90,16 +90,36 @@ function WinkSensorAccessory(platform, device) {
 			});
 
 	//Open/Close Sensor
-	if (that.device.last_reading.opened !== undefined)
-		this
-			.addService(Service.Door)
-			.getCharacteristic(Characteristic.CurrentPosition)
-			.on('get', function (callback) {
-				if (that.device.last_reading.opened)
-					callback(null, 100);
-				else
-					callback(null, 0);
-			});
+	if (that.device.last_reading.opened !== undefined) {
+		if (platform.windowsensors.indexOf(that.deviceId) >= 0) {
+			this
+				.addService(Service.Window)
+				.getCharacteristic(Characteristic.CurrentPosition)
+				.on('get', function (callback) {
+					if (that.device.last_reading.opened)
+						callback(null, 100);
+					else
+						callback(null, 0);
+				});
+			this
+				.getService(Service.Window)
+				.setCharacteristic(Characteristic.PositionState, Characteristic.PositionState.STOPPED)			
+		} else {
+			this
+				.addService(Service.Door)
+				.getCharacteristic(Characteristic.CurrentPosition)
+				.on('get', function (callback) {
+					if (that.device.last_reading.opened)
+						callback(null, 100);
+					else
+						callback(null, 0);
+				});
+			this
+				.getService(Service.Door)
+				.setCharacteristic(Characteristic.PositionState, Characteristic.PositionState.STOPPED)
+		}
+	}
+
 
 
 	//Track the Battery Level
@@ -165,9 +185,16 @@ var loadData = function () {
 			.getValue();
 
 	//Open/Close Sensor
-	if (this.device.last_reading.opened !== undefined)
-		this
+	if (this.device.last_reading.opened !== undefined) {
+		if (this.platform.windowsensors.indexOf(this.deviceId) >= 0) 
+			this
+			.getService(Service.Window)
+			.getCharacteristic(Characteristic.CurrentPosition)
+			.getValue();
+		else
+			this
 			.getService(Service.Door)
 			.getCharacteristic(Characteristic.CurrentPosition)
 			.getValue();
+	}
 };

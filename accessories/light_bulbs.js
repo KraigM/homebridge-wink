@@ -4,6 +4,7 @@ var events = require('events');
 var eventEmitter = new events.EventEmitter();
 
 var WinkAccessory, Accessory, Service, Characteristic, uuid;
+var setH, setS, setB;
 
 /*
  *   Light Accessory
@@ -29,7 +30,11 @@ function WinkLightAccessory(platform, device) {
 	WinkAccessory.call(this, platform, device, device.light_bulb_id);
 
 	var that = this;
-
+	
+	this.hue = undefined;
+	this.saturation = undefined;
+	this.brightness = undefined;
+	
 	//Items specific to Light Bulbs Locks:
 	this
 		.addService(Service.Lightbulb)
@@ -46,27 +51,26 @@ function WinkLightAccessory(platform, device) {
 			.getService(Service.Lightbulb)
 			.getCharacteristic(Characteristic.Brightness)
 			.on('get', function (callback) {
-				callback(null, Math.floor(that.device.last_reading.brightness * 100));
+				that.brightness=Math.floor(that.device.last_reading.brightness * 100);
+				callback(null, that.brightness);
 			})
 			.on('set', function (value, callback) {
-				that.updateWinkProperty(callback, "brightness", value / 100);
+				that.brightness=value / 100;
+				that.updateWinkProperty(callback, "brightness", that.brightness);
 			});
-
-	if (that.device.desired_state.color_model != undefined)
-		that.updateWinkProperty(function () {
-			return 0;
-		}, "color_model", "hsb", true);
-
 
 	if (that.device.desired_state.hue !== undefined)
 		this
 			.getService(Service.Lightbulb)
 			.getCharacteristic(Characteristic.Hue)
 			.on('get', function (callback) {
-				callback(null, Math.floor(that.device.last_reading.hue * 360));
+				that.hue = Math.floor(that.device.last_reading.hue*360);
+				callback(null, that.hue);
 			})
 			.on('set', function (value, callback) {
-				that.updateWinkProperty(callback, "hue", value / 360);
+				that.hue = value/360;
+				that.updateWinkProperty(callback, ["hue","saturation","brightness","color_model"], 
+											[that.hue, that.saturation, that.brightness, 'hsb']);				
 			});
 
 	if (that.device.desired_state.saturation !== undefined)
@@ -74,10 +78,13 @@ function WinkLightAccessory(platform, device) {
 			.getService(Service.Lightbulb)
 			.getCharacteristic(Characteristic.Saturation)
 			.on('get', function (callback) {
-				callback(null, Math.floor(that.device.last_reading.saturation * 100));
+				that.saturation = Math.floor(that.device.last_reading.saturation*100);
+				callback(null, that.saturation);
 			})
 			.on('set', function (value, callback) {
-				that.updateWinkProperty(callback, "saturation", value / 100);
+				that.saturation = value/100;
+				that.updateWinkProperty(callback, ["hue","saturation","brightness","color_model"], 
+											[that.hue, that.saturation, that.brightness, 'hsb']);				
 			});
 
 	this.loadData();
