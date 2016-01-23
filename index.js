@@ -76,7 +76,7 @@ function WinkPlatform(log, config) {
 WinkPlatform.prototype = {
 	reloadData: function (callback) {
 		//This is called when we need to refresh all Wink device information.
-		this.log("Refreshing Wink Data");
+		this.log.debug("Refreshing Wink Data");
 		var that = this;
 		wink.user().devices(function (devices) { //TODO: Add the ability to detect new devices and unregister newly disconnected devices.
 			if (devices && devices.data && devices.data instanceof Array) {
