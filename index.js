@@ -17,6 +17,7 @@ var WinkAirConditionerAccessory;
 var WinkSensorAccessory;
 var WinkPropaneTankAccessory;
 var WinkSirenAccessory;
+var WinkShadeAccessory;
 
 module.exports = function (homebridge) {
 	Service = homebridge.hap.Service;
@@ -36,7 +37,8 @@ module.exports = function (homebridge) {
 	WinkSensorAccessory = require('./accessories/sensor_pods')(WinkAccessory, Accessory, Service, Characteristic, uuid);
 	WinkPropaneTankAccessory = require('./accessories/propane_tanks')(WinkAccessory, Accessory, Service, Characteristic, uuid);
 	WinkSirenAccessory = require('./accessories/sirens')(WinkAccessory, Accessory, Service, Characteristic, uuid);
-
+	WinkShadeAccessory = require('./accessories/shades')(WinkAccessory, Accessory, Service, Characteristic, uuid);
+	
 	homebridge.registerPlatform("homebridge-wink", "Wink", WinkPlatform);
 };
 
@@ -62,6 +64,11 @@ function WinkPlatform(log, config) {
 	this.temperature_unit = config["temperature_unit"];
 	if (this.temperature_unit === undefined) this.temperature_unit = "F";
 
+	//Allows specific positional sensors to be treated as Windows instead of Doors
+	this.windowsensors = config["window_ids"];
+	if (this.windowsensors == undefined) this.windowsensors = [];
+
+	
 	this.log = log;
 	this.deviceLookup = {};
 }
@@ -152,6 +159,9 @@ WinkPlatform.prototype = {
 
 						else if (device.siren_id !== undefined)
 							accessory = new WinkSirenAccessory(that, device);
+
+						else if (device.shade_id !== undefined)
+							accessory = new WinkShadeAccessory(that, device);
 
 						//These are here to prevent Unknown Device Groups in the logs when we know what the device is and can't represent it
 						//with a HomeKit service yet.

@@ -3,7 +3,7 @@ var inherits = require('util').inherits;
 var WinkAccessory, Accessory, Service, Characteristic, uuid;
 
 /*
- *   Garage Door Accessory
+ *   Shade Accessory
  */
 
 module.exports = function (oWinkAccessory, oAccessory, oService, oCharacteristic, ouuid) {
@@ -14,50 +14,50 @@ module.exports = function (oWinkAccessory, oAccessory, oService, oCharacteristic
 		Characteristic = oCharacteristic;
 		uuid = ouuid;
 
-		inherits(WinkGarageDoorAccessory, WinkAccessory);
-		WinkGarageDoorAccessory.prototype.loadData = loadData;
-		WinkGarageDoorAccessory.prototype.deviceGroup = 'garage_doors';
+		inherits(WinkShadeAccessory, WinkAccessory);
+		WinkShadeAccessory.prototype.loadData = loadData;
+		WinkShadeAccessory.prototype.deviceGroup = 'shades';
 	}
-	return WinkGarageDoorAccessory;
+	return WinkShadeAccessory;
 };
-module.exports.WinkGarageDoorAccessory = WinkGarageDoorAccessory;
+module.exports.WinkShadeAccessory = WinkShadeAccessory;
 
-function WinkGarageDoorAccessory(platform, device) {
-	WinkAccessory.call(this, platform, device, device.garage_door_id);
+function WinkShadeAccessory(platform, device) {
+	WinkAccessory.call(this, platform, device, device.shade_id);
 
 	var that = this;
 
-	//Items specific to Garage Doors:
+	//Items specific to Shades:
 	this
-		.addService(Service.GarageDoorOpener)
-		.getCharacteristic(Characteristic.TargetDoorState)
+		.addService(Service.WindowCovering)
+		.getCharacteristic(Characteristic.TargetPosition)
 		.on('get', function (callback) {
 			if (that.device.desired_state.position == 0)
-				callback(null, Characteristic.TargetDoorState.CLOSED);
+				callback(null, 0);
 			else if (that.device.desired_state.position == 1)
-				callback(null, Characteristic.TargetDoorState.OPEN);
+				callback(null, 100);
 		})
 		.on('set', function (value, callback) {
-			if (value == Characteristic.TargetDoorState.OPEN)
+			if (value == 100)
 				that.updateWinkProperty(callback, "position", 1);
-			else if (value == Characteristic.TargetDoorState.CLOSED)
+			else if (value == 0)
 				that.updateWinkProperty(callback, "position", 0);
 		});
 
 	this
-		.getService(Service.GarageDoorOpener)
-		.getCharacteristic(Characteristic.CurrentDoorState)
+		.getService(Service.WindowCovering)
+		.getCharacteristic(Characteristic.CurrentPosition)
 		.on('get', function (callback) {
 			if (that.device.last_reading.position == 0)
-				callback(null, Characteristic.CurrentDoorState.CLOSED);
+				callback(null, 0);
 			else if (that.device.last_reading.position == 1)
-				callback(null, Characteristic.CurrentDoorState.OPEN);
+				callback(null, 100);
 		});
 
 	this
-		.getService(Service.GarageDoorOpener)
-		.setCharacteristic(Characteristic.ObstructionDetected, false);
-
+		.getService(Service.WindowCovering)
+		.setCharacteristic(Characteristic.PositionState, Characteristic.PositionState.STOPPED)
+		
 	//Track the Battery Level
 	if (that.device.last_reading.battery !== undefined) {
 		this.addService(Service.BatteryService)
@@ -84,11 +84,11 @@ function WinkGarageDoorAccessory(platform, device) {
 }
 
 var loadData = function () {
-	this.getService(Service.GarageDoorOpener)
-		.getCharacteristic(Characteristic.CurrentDoorState)
+	this.getService(Service.WindowCovering)
+		.getCharacteristic(Characteristic.CurrentPosition)
 		.getValue();
-	this.getService(Service.GarageDoorOpener)
-		.getCharacteristic(Characteristic.TargetDoorState)
+	this.getService(Service.WindowCovering)
+		.getCharacteristic(Characteristic.TargetPosition)
 		.getValue();
 	if (this.device.last_reading.battery !== undefined) {
 		this.getService(Service.BatteryService)
