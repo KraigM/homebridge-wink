@@ -7,7 +7,7 @@ This repository contains the Wink plugin for homebridge that was previously bund
 
 1. Install homebridge using: npm install -g homebridge
 2. Install this plugin using: npm install -g homebridge-wink
-3. Update your configuration file. See sample config.json snippet below. 
+3. Update your configuration file. See sample config.json snippet below.
 
 # Configuration
 
@@ -23,14 +23,14 @@ Configuration sample:
 			"username": "your@email.com",
 			"password": "WINK_PASSWORD",
 			"hide_groups": ["garage_doors", "thermostats"],
-			"hide_ids": []
-			
+			"hide_ids": [],
+			"fan_ids": []
 		}
 	],
 
 ```
 
-Fields: 
+Fields:
 
 * "platform": Must always be "Wink" (required)
 * "name": Can be anything (required)
@@ -48,7 +48,8 @@ Fields:
   * sensor_pods  
   * smoke_detectors  
   * thermostats
-* "hide_ids": List of Wink IDs that will be hidden from Homebrige. These ID can easily be seen in the initialization portion of homebridge.
+* "hide_ids": List of Wink IDs that will be hidden from Homebridge. These ID can easily be seen in the initialization portion of Homebridge.
+* "fan_ids": List of Wink IDs (for binary switches) that will be added as fans to Homebridge.
 * "temperature_unit" : Identifies the display unit for thermostats. F or C. Defaults to F
 * "unregister_disconnected" : Blocks devices that are currently disconnected from the Wink hub. true/false. Defaults to true.
 
@@ -56,7 +57,7 @@ Fields:
 
 Supported Devices:
 
-* Air Conditioners - Identifies the direct-connected Wink Aros. 
+* Air Conditioners - Identifies the direct-connected Wink Aros.
   * Change between cool, auto and off.
   * Set temperature.
   * Direct fan control is not yet available.
@@ -64,6 +65,7 @@ Supported Devices:
   * On/Off Functions.
   * For the Outlink, uses the power usage to determine if on or off.
   * Does not report actual power usage due to limitation in HomeKit Interface.
+  * Can be added to Homekit as a fan using fan_ids optional configuration field.
 * Garage Doors
   * Open/Close Wink-connected garage doors.
   * Report battery status to HomeKit.
@@ -89,7 +91,7 @@ Supported Devices:
   * Reports CO and Smoke Alarms as available by the detector
 * Thermostats
   * Should be full functionality.
-  
+
 Not Yet Supported Devices In Consideration
 
 * Cameras
