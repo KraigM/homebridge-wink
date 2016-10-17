@@ -38,7 +38,7 @@ module.exports = function (homebridge) {
 	WinkPropaneTankAccessory = require('./accessories/propane_tanks')(WinkAccessory, Accessory, Service, Characteristic, uuid);
 	WinkSirenAccessory = require('./accessories/sirens')(WinkAccessory, Accessory, Service, Characteristic, uuid);
 	WinkShadeAccessory = require('./accessories/shades')(WinkAccessory, Accessory, Service, Characteristic, uuid);
-	
+
 	homebridge.registerPlatform("homebridge-wink", "Wink", WinkPlatform);
 };
 
@@ -68,7 +68,10 @@ function WinkPlatform(log, config) {
 	this.windowsensors = config["window_ids"];
 	if (this.windowsensors == undefined) this.windowsensors = [];
 
-	
+	//Allows specific binary switches to be treated as fans instead of switchess
+	this.fans = config["fan_ids"];
+	if (this.fans == undefined) this.fans = [];
+
 	this.log = log;
 	this.deviceLookup = {};
 }
