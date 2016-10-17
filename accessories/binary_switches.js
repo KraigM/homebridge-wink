@@ -27,8 +27,22 @@ function WinkSwitchAccessory(platform, device) {
 	WinkAccessory.call(this, platform, device, device.binary_switch_id);
 
 	var that = this;
+	var fan = !!(platform.fans.indexOf(that.device.binary_switch_id) + 1);
 
-	if (that.device.last_reading.consumption == undefined) {
+	if (fan) {
+		//If id is included in list of fans we treat as a fan
+		that
+			.addService(Service.Fan)
+			.getCharacteristic(Characteristic.On)
+			.on('get', function (callback) {
+				callback(null, that.device.last_reading.powered);
+			})
+			.on('set', function (value, callback) {
+				that.updateWinkProperty(callback, "powered", value);
+			});
+
+				this.fan = true;
+	} else if (that.device.last_reading.consumption == undefined) {
 		//If consumption is undefined then we will treat this like a lightbulb
 		this
 			.addService(Service.Lightbulb)
@@ -63,7 +77,11 @@ function WinkSwitchAccessory(platform, device) {
 }
 
 var loadData = function () {
-	if (this.device.last_reading.consumption == undefined) {
+	if (this.fan) {
+		this.getService(Service.Fan)
+			.getCharacteristic(Characteristic.On)
+			.getValue();
+	} else if (this.device.last_reading.consumption == undefined) {
 		this.getService(Service.Lightbulb)
 			.getCharacteristic(Characteristic.On)
 			.getValue();
