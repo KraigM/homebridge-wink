@@ -1143,9 +1143,9 @@ Wink2.prototype.addAccessoryCharacteristics = function (inAccessory, device) {
         callback();
     }.bind(newAccessory));
             
-    if (!!(platform.hideids.indexOf(newAccessory.context.object_id) + 1))
+    if (platform.hideids.indexOf(parseInt(newAccessory.context.object_id))>=0)
         isSupported = false;
-    if (!!(platform.hidegroups.indexOf(newAccessory.context.object_type) + 1))
+    if (platform.hidegroups.indexOf(newAccessory.context.object_type)>=0)
         isSupported = false;
     
     if (!isSupported) {
@@ -1159,12 +1159,12 @@ Wink2.prototype.addAccessoryCharacteristics = function (inAccessory, device) {
     newAccessory.updateReachability(newAccessory.reachable);
 
     if (inAccessory) {
-        this.log("Reclaiming: " + device.name);
+        this.log("Reclaiming: " + device.name+" - ID "+device.object_id+" - TYPE "+device.object_type);
         //Preload the device cache in the API with the value we were saved with. 
         platform.winkAPI._deviceReceiptProcessor({ data: [newAccessory.context] }, 'preload')
         //Add the accessory to the array for tracking it.
     } else {
-        this.log("Adding: " + device.name);
+        this.log("Adding: " + device.name+" - ID "+device.object_id+" - TYPE "+device.object_type);
         this.api.registerPlatformAccessories("homebridge-Wink2", "Wink2", [newAccessory]);
     }
     this.accessories_configured[newAccessory.UUID] = newAccessory;
