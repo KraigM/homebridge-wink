@@ -22,7 +22,8 @@ module.exports = function (homebridge) {
 // config may be null
 // api may be null if launched from old homebridge version
 function Wink2(log, config, api) {
-    log("Wink2 Init");
+    var pjson = require('./package.json');
+    log("Wink2 Init - Version " + pjson.version);
     if (!config) {
         log("No Wink Config Present");
         return;
