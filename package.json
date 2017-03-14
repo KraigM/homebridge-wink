@@ -1,7 +1,7 @@
 {
-	"name": "homebridge-wink2",
+	"name": "homebridge-wink",
 	"description": "HomeBridge plugin for the Wink hub",
-	"version": "2.0.8",
+	"version": "2.1.0",
 	"repository": {
 		"type": "git",
 		"url": "git://github.com/pdlove/homebridge-wink.git"

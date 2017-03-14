@@ -15,15 +15,15 @@ module.exports = function (homebridge) {
 
     // For platform plugin to be considered as dynamic platform plugin,
     // registerPlatform(pluginName, platformName, constructor, dynamic), dynamic must be true
-    homebridge.registerPlatform("homebridge-wink2", "Wink2", Wink2, true);
+    homebridge.registerPlatform("homebridge-wink", "Wink", Wink, true);
 }
 
 // Platform constructor
 // config may be null
 // api may be null if launched from old homebridge version
-function Wink2(log, config, api) {
+function Wink(log, config, api) {
     var pjson = require('./package.json');
-    log("Wink2 Init - Version " + pjson.version);
+    log("Wink Init - Version " + pjson.version);
     if (!config) {
         log("No Wink Config Present");
         return;
@@ -98,7 +98,7 @@ function Wink2(log, config, api) {
         }.bind(this));
 }
 
-Wink2.prototype.addAttributeUsage = function (attribute, deviceid, mycharacteristic) {
+Wink.prototype.addAttributeUsage = function (attribute, deviceid, mycharacteristic) {
     if (!this.attributeLookup[deviceid])
         this.attributeLookup[deviceid] = {};
     if (!this.attributeLookup[deviceid][attribute])
@@ -106,12 +106,12 @@ Wink2.prototype.addAttributeUsage = function (attribute, deviceid, mycharacteris
     this.attributeLookup[deviceid][attribute].push(mycharacteristic);
 }
 
-Wink2.prototype.getaddService = function (Accessory, Service) {
+Wink.prototype.getaddService = function (Accessory, Service) {
     var myService = Accessory.getService(Service);
     if (!myService) myService = Accessory.addService(Service);
     return myService
 };
-Wink2.prototype.getaddCharacteristic = function (Accessory, Service, Characteristic) {
+Wink.prototype.getaddCharacteristic = function (Accessory, Service, Characteristic) {
     var myService = this.getaddService(Accessory, Service);
     var myCharacteristic = myService.getCharacteristic(Characteristic);
     if (!myCharacteristic) myCharacteristic = myService.addCharacteristic(Characteristic);
@@ -119,11 +119,11 @@ Wink2.prototype.getaddCharacteristic = function (Accessory, Service, Characteris
 }
 
 // Sample function to show how developer can add accessory dynamically from outside event
-Wink2.prototype.addAccessory = function (device) {
+Wink.prototype.addAccessory = function (device) {
     this.addAccessoryCharacteristics(this.accessories_configured[device.uuid], device);
 }
 
-Wink2.prototype.addAccessoryCharacteristics = function (inAccessory, device) {
+Wink.prototype.addAccessoryCharacteristics = function (inAccessory, device) {
     var newAccessory;
     var platform = this;
     if (inAccessory) {
@@ -1166,17 +1166,17 @@ Wink2.prototype.addAccessoryCharacteristics = function (inAccessory, device) {
         //Add the accessory to the array for tracking it.
     } else {
         this.log("Adding: " + device.name+" - ID "+device.object_id+" - TYPE "+device.object_type);
-        this.api.registerPlatformAccessories("homebridge-Wink2", "Wink2", [newAccessory]);
+        this.api.registerPlatformAccessories("homebridge-Wink", "Wink", [newAccessory]);
     }
     this.accessories_configured[newAccessory.UUID] = newAccessory;
 }
 
-Wink2.prototype.configureAccessory = function (newAccessory) {
+Wink.prototype.configureAccessory = function (newAccessory) {
     this.accessories_unconfigured[newAccessory.UUID] = newAccessory;
 }
 
 //Updates the Value to HomeKit given the Wink equivilent.
-Wink2.prototype.changedAccessory = function (WinkUUID, changeGroup, changedField, oldValue, newValue, fullDeviceData) {
+Wink.prototype.changedAccessory = function (WinkUUID, changeGroup, changedField, oldValue, newValue, fullDeviceData) {
     var myDevice = this.accessories_configured[WinkUUID];
     if (myDevice === undefined) return;
     myDevice.context[changeGroup][changedField] = newValue;
@@ -1194,7 +1194,7 @@ Wink2.prototype.changedAccessory = function (WinkUUID, changeGroup, changedField
 }
 
 //Needs work. Should update based on the "connection" value
-Wink2.prototype.updateAccessoriesReachability = function () {
+Wink.prototype.updateAccessoriesReachability = function () {
     this.log("Update Reachability");
     for (var index in this.accessories) {
         var accessory = this.accessories[index];
@@ -1203,14 +1203,14 @@ Wink2.prototype.updateAccessoriesReachability = function () {
 }
 
 //Removes the device from the Homebridge caceh
-Wink2.prototype.removeAccessory = function (device) {
+Wink.prototype.removeAccessory = function (device) {
     this.log("Remove Accessory: " + device.name);
     if (this.accessories_configured[device.uuid]) {
-        this.api.unregisterPlatformAccessories("homebridge-Wink2", "Wink2", [this.accessories_configured[device.uuid]]);
+        this.api.unregisterPlatformAccessories("homebridge-Wink", "Wink", [this.accessories_configured[device.uuid]]);
         delete this.accessories_configured[device.uuid]
     }
     if (this.accessories_unconfigured[device.uuid]) {
-        this.api.unregisterPlatformAccessories("homebridge-Wink2", "Wink2", [this.accessories_unconfigured[device.uuid]]);
+        this.api.unregisterPlatformAccessories("homebridge-Wink", "Wink", [this.accessories_unconfigured[device.uuid]]);
         delete this.accessories_unconfigured[device.uuid]
     }
 
@@ -1218,7 +1218,7 @@ Wink2.prototype.removeAccessory = function (device) {
 
 //Handler will be invoked when user try to config your plugin
 //Callback can be cached and invoke when nessary
-Wink2.prototype.configurationRequestHandler = function (context, request, callback) {
+Wink.prototype.configurationRequestHandler = function (context, request, callback) {
     this.log("Context: ", JSON.stringify(context));
     this.log("Request: ", JSON.stringify(request));
 
@@ -1232,7 +1232,7 @@ Wink2.prototype.configurationRequestHandler = function (context, request, callba
         // set "replace" to true will let homebridge replace existing config in config.json
         // "config" is the data platform trying to save
         callback(null, "platform", true, {
-            "platform": "Wink2",
+            "platform": "Wink",
             "otherConfig": "SomeData"
         });
         return;

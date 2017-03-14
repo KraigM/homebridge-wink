@@ -6,7 +6,7 @@ This is a complete rewrite of homebridge-wink. The UUID for the devices are now 
 # Installation
 
 1. Install homebridge using: npm install -g homebridge
-2. Install this plugin using: npm install -g homebridge-wink2
+2. Install this plugin using: npm install -g homebridge-wink
 3. Update your configuration file. See sample config.json snippet below.
 
 # Configuration
@@ -16,8 +16,8 @@ Configuration sample:
  ```
 "platforms": [
 		{
-			"platform": "Wink2",
-			"name": "Wink2",
+			"platform": "Wink",
+			"name": "Wink",
 			"username": "your@email.com",
 			"password": "WINK_PASSWORD",
 			"client_id": "YOUR_WINK_API_CLIENT_ID",
@@ -32,7 +32,7 @@ Configuration sample:
 
 Fields:
 
-* "platform": Must always be "Wink2" (required)
+* "platform": Must always be "Wink" (required)
 * "name": Can be anything (required)
 * "client_id": Wink API client id, must be obtained from questions@wink.com. You are required to get your own key, but one is provided for initial use. Warning! Personal API keys will not allow use of 3rd party garage door openers.
 * "client_secret": Wink API client id, must be obtained from questions@wink.com. You are required to get your own key, but one is provided for initial use.
@@ -104,7 +104,7 @@ Not Yet Supported Devices In Consideration
 
 Log Messages and their meaning:
  
- * <b>Wink2 Init</b> - Occurs when the plugin is initialized by Homebridge.
+ * <b>Wink Init</b> - Occurs when the plugin is initialized by Homebridge.
  * <b>No Wink Config Present</b> - Occurs if Homebridge initializes the plugin without a configuration.
  * <b>Adding: [Device Name]</b> - Occurs when a new device has been detected from Wink and has been loaded.
  * <b>Reclaiming: [Device Name]</b> - Occurs when Homebridge has sent cached information to the plugin.
