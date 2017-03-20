@@ -91,7 +91,7 @@ function Wink(log, config, api) {
                 "platform": this
             }, function (success, auth_return) {
                 if (!success)
-                    platform.log("There was a problem authenticating with Wink: " + data.error_message);
+                    platform.log("There was a problem authenticating with Wink: " + auth_return.error_description);
                 else
                     platform.log("Wink Authentication Successful.");
             });
