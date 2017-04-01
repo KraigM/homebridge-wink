@@ -39,16 +39,16 @@ Fields:
 * "username": Wink login username, same as app (required)
 * "password": Wink login password, same as app (required)
 * "hide_groups": List of Wink groups that will be hidden from Homebridge. Accepted values are:  
-  * air_contidioners  
-  * binary_switches  
-  * garage_doors  
-  * light_bulbs  
-  * locks  
-  * outlets  
-  * sensor_pods  
-  * shades
-  * smoke_detectors  
-  * thermostats
+  * air_contidioner
+  * binary_switch  
+  * garage_door  
+  * light_bulb  
+  * lock  
+  * outlet  
+  * sensor_pod  
+  * shade
+  * smoke_detector  
+  * thermostat
 * "hide_ids": List of Wink IDs that will be hidden from Homebridge. These ID can easily be seen as the accessory's serial number in the IOS Home app..
 * "fan_ids": List of Wink IDs (for binary switches or lightbulbs) that will be added as fans to Homebridge.
 * "temperature_unit" : Identifies the display unit for thermostats. F or C. Defaults to F
