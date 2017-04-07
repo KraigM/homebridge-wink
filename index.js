@@ -27,7 +27,7 @@ function Wink(log, config, api) {
     if (!config) {
         log("No Wink Config Present");
         return;
-    } 
+    }
     var that = this;
     var platform = this;
     this.log = log;
@@ -294,6 +294,11 @@ Wink.prototype.addAccessoryCharacteristics = function (inAccessory, device) {
                     }
                 }.bind(newAccessory))
                 .on('set', function (value, callback) {
+                    if (value === false) {
+                        value = Characteristic.LockTargetState.UNSECURED;
+                    } else if (value === true) {
+                        value = Characteristic.LockTargetState.SECURED;
+                    }
                     switch (value) {
                         case Characteristic.LockTargetState.SECURED:
                             callback();
@@ -669,7 +674,7 @@ Wink.prototype.addAccessoryCharacteristics = function (inAccessory, device) {
             //symbiote_update_needed	boolean	whether wifi module needs an update
             //symbiote_updating_firmware	boolean	whether wifi module is currently updating
             break;
-        case 'propane_tank': 
+        case 'propane_tank':
             //Reading
             //connection	Boolean	whether or not the device is reachable remotely
             //battery	float	0 - 1, battery percentage
@@ -839,11 +844,11 @@ Wink.prototype.addAccessoryCharacteristics = function (inAccessory, device) {
             //battery	float	[0 - 1] percentage of battery
             //connection	boolean	whether or not the sensor has connection
             break;
-        case 'smoke_detector': 
+        case 'smoke_detector':
             //Reading
             //smoke_detected	boolean	whether or not smoke is currently detected
             //co_detected	boolean	whether or not carbon monoxide is currently detected
-            //test_activated	whether or not a test is currently activated	
+            //test_activated	whether or not a test is currently activated
             //connection	boolean	current connection status
             //battery	float	[0 - 1] battery percentage
             //smoke_severity	float	[0 - 1] if present, severity of smoke detection
@@ -946,7 +951,7 @@ Wink.prototype.addAccessoryCharacteristics = function (inAccessory, device) {
             //////Reading
             //connection	boolean	whether or not the device is reachable remotely
             //temperature	float in celsius	[maps to room temperature last read from device itself]
-            //smart_temperature	ecobee only, mean temp of all remote sensors and thermostat	
+            //smart_temperature	ecobee only, mean temp of all remote sensors and thermostat
             //humidity	float	[0-1] from device readings
             //external_temperature	float in celsius	the outdoor temperature/weather
             //max_max_set_point	float in celsius	highest allowed max set point
@@ -1143,12 +1148,12 @@ Wink.prototype.addAccessoryCharacteristics = function (inAccessory, device) {
     newAccessory.on('identify', function (paired, callback) {
         callback();
     }.bind(newAccessory));
-            
+
     if (platform.hideids.indexOf(parseInt(newAccessory.context.object_id))>=0)
         isSupported = false;
     if (platform.hidegroups.indexOf(newAccessory.context.object_type)>=0)
         isSupported = false;
-    
+
     if (!isSupported) {
         //Remove accessory. Make sure it is totally removed from Wink if it already exists there.
         if (inAccessory)
@@ -1161,7 +1166,7 @@ Wink.prototype.addAccessoryCharacteristics = function (inAccessory, device) {
 
     if (inAccessory) {
         this.log("Reclaiming: " + device.name+" - ID "+device.object_id+" - TYPE "+device.object_type);
-        //Preload the device cache in the API with the value we were saved with. 
+        //Preload the device cache in the API with the value we were saved with.
         platform.winkAPI._deviceReceiptProcessor({ data: [newAccessory.context] }, 'preload')
         //Add the accessory to the array for tracking it.
     } else {
@@ -1251,7 +1256,7 @@ Wink.prototype.configurationRequestHandler = function (context, request, callbac
             "id": "name",
             "title": "Name",
             "placeholder": "Fancy Light"
-        } //, 
+        } //,
             // {
             //   "id": "pw",
             //   "title": "Password",
