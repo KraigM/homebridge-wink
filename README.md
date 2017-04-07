@@ -39,8 +39,8 @@ Fields:
 * "username": Wink login username, same as app (required)
 * "password": Wink login password, same as app (required)
 * "hide_groups": List of Wink groups that will be hidden from Homebridge. Accepted values are:  
-  * air_contidioner  
-  * binary_switche  
+  * air_contidioner
+  * binary_switch
   * garage_door  
   * light_bulb  
   * lock  
