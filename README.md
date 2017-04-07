@@ -5,8 +5,8 @@ This is a complete rewrite of homebridge-wink. The UUID for the devices are now 
 
 # Installation
 
-1. Install homebridge using: npm install -g homebridge
-2. Install this plugin using: npm install -g homebridge-wink
+1. Install homebridge using: `npm install -g homebridge`
+2. Install this plugin using: `npm install -g homebridge-wink`
 3. Update your configuration file. See sample config.json snippet below.
 
 # Configuration
@@ -22,7 +22,7 @@ Configuration sample:
 			"password": "WINK_PASSWORD",
 			"client_id": "YOUR_WINK_API_CLIENT_ID",
 			"client_secret": "YOUR_WINK_API_CLIENT_SECRET",
-			"hide_groups": ["garage_doors", "thermostats"],
+			"hide_groups": ["garage_door", "thermostat"],
 			"hide_ids": [],
 			"fan_ids": []
 		}
@@ -39,16 +39,16 @@ Fields:
 * "username": Wink login username, same as app (required)
 * "password": Wink login password, same as app (required)
 * "hide_groups": List of Wink groups that will be hidden from Homebridge. Accepted values are:  
-  * air_contidioners  
-  * binary_switches  
-  * garage_doors  
-  * light_bulbs  
-  * locks  
-  * outlets  
-  * sensor_pods  
-  * shades
-  * smoke_detectors  
-  * thermostats
+  * air_contidioner  
+  * binary_switche  
+  * garage_door  
+  * light_bulb  
+  * lock  
+  * outlet  
+  * sensor_pod  
+  * shade
+  * smoke_detector  
+  * thermostat
 * "hide_ids": List of Wink IDs that will be hidden from Homebridge. These ID can easily be seen as the accessory's serial number in the IOS Home app..
 * "fan_ids": List of Wink IDs (for binary switches or lightbulbs) that will be added as fans to Homebridge.
 * "temperature_unit" : Identifies the display unit for thermostats. F or C. Defaults to F
