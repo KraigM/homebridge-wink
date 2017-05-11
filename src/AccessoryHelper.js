@@ -1,5 +1,6 @@
 export default class AccessoryHelper {
   constructor(options) {
+    this.config = options.config;
     this.definitions = options.definitions;
     this.hap = options.hap;
     this.onChange = options.onChange;
