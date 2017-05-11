@@ -9,6 +9,11 @@ export const platformName = "Wink";
 
 export default class WinkPlatform {
   constructor(log, config, api) {
+    if (!config) {
+      log("Plugin not configured.");
+      return;
+    }
+
     this.log = log;
     this.config = this.cleanConfig(config);
     this.api = api;
