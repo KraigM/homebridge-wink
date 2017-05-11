@@ -68,16 +68,6 @@ export default ({ Characteristic, Service }) => {
         ]
       },
       {
-        service: Service.TemperatureSensor,
-        supported: state => state.temperature !== undefined,
-        characteristics: [
-          {
-            characteristic: Characteristic.CurrentTemperature,
-            get: state => state.temperature
-          }
-        ]
-      },
-      {
         service: Service.Door,
         supported: isDoor,
         characteristics: [
