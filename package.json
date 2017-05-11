@@ -1,0 +1,54 @@
+{
+  "name": "homebridge-wink3",
+  "version": "1.0.0",
+  "description": "Homebridge plugin for wink.com",
+  "homepage": "https://github.com/sibartlett/homebridge-wink3",
+  "repository": "git://github.com/sibartlett/homebridge-wink3",
+  "author": "Simon Bartlett <simon@sibartlett.com>",
+  "license": "ISC",
+  "main": "dist/index.js",
+  "preferGlobal": true,
+  "keywords": [
+    "homebridge-plugin",
+    "wink"
+  ],
+  "engines": {
+    "node": ">=6.0.0",
+    "homebridge": ">=0.2.5"
+  },
+  "scripts": {
+    "build": "rimraf dist/ && babel src/ --out-dir dist/",
+    "dropcache": "rm /usr/local/lib/node_modules/homebridge/node_modules/node-persist/storage/accessories/cachedAccessories",
+    "lint": "eslint .",
+    "prettier": "prettier --write src/**/*.js",
+    "precommit": "lint-staged",
+    "start": "homebridge -D -P . -U ."
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "pubnub": "^4.8.0",
+    "request": "^2.81.0",
+    "request-promise-native": "^1.0.3",
+    "require-all": "^2.2.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-env": "^1.3.3",
+    "babel-preset-stage-2": "^6.24.1",
+    "eslint": "^3.19.0",
+    "eslint-config-prettier": "^1.7.0",
+    "eslint-plugin-prettier": "^2.0.1",
+    "husky": "^0.13.3",
+    "lint-staged": "^3.4.0",
+    "prettier": "^1.2.2",
+    "rimraf": "^2.6.1"
+  }
+}
