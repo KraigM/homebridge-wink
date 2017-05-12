@@ -25,11 +25,6 @@ export default class WinkClient {
     });
   }
 
-  getErrorMessage(err) {
-    const data = err.statusCode && err.error && err.error.data;
-    return (data && (data.error_description || data.error)) || err.message;
-  }
-
   request(options, hub) {
     const accessToken = hub ? hub.access_token : this.access_token;
     const headers = {
@@ -71,9 +66,8 @@ export default class WinkClient {
 
       this.log("Authenticated with wink.com");
       return true;
-    } catch (err) {
-      const message = this.getErrorMessage(err);
-      this.log(`Could not authenticate with wink.com: ${message}`);
+    } catch (e) {
+      this.log("error", "Could not authenticate with wink.com", e);
       return false;
     }
   }
@@ -114,7 +108,10 @@ export default class WinkClient {
   }
 
   async isHubReachable(hub) {
+    const errorMessage = `Wink hub (${hub.device.last_reading.ip_address}) is not reachable locally`;
+
     try {
+
       const response = await this.request(
         {
           method: "GET",
@@ -126,11 +123,14 @@ export default class WinkClient {
       );
 
       hub.reachable = response.indexOf("wink.com") !== -1;
-    } catch (err) {
+
+      if (!hub.reachable) {
+        this.log("warn", errorMessage);
+      }
+
+    } catch (e) {
       hub.reachable = false;
-      this.log(
-        `Wink hub (${hub.device.last_reading.ip_address}) is not reachable locally`
-      );
+      this.log("warn", errorMessage, e);
     }
 
     return hub.reachable;
@@ -141,30 +141,44 @@ export default class WinkClient {
       return;
     }
 
-    const response = await this.request({
-      method: "POST",
-      uri: "/oauth2/token",
-      body: {
-        local_control_id: hub.device.last_reading.local_control_id,
-        scope: "local_control",
-        grant_type: "refresh_token",
-        refresh_token: this.refresh_token,
-        client_id: this.credentials.client_id,
-        client_secret: this.credentials.client_secret
-      }
-    });
+    const errorMessage = `Could not authenticate with local Wink hub (${hub.device.last_reading.ip_address})`;
+    let authenticated = false;
 
-    if (response && response.errors.length === 0) {
+    try {
+
+      const response = await this.request({
+        method: "POST",
+        uri: "/oauth2/token",
+        body: {
+          local_control_id: hub.device.last_reading.local_control_id,
+          scope: "local_control",
+          grant_type: "refresh_token",
+          refresh_token: this.refresh_token,
+          client_id: this.credentials.client_id,
+          client_secret: this.credentials.client_secret
+        }
+      });
+
+      if (response.errors && response.errors.length) {
+        this.log("warn", errorMessage, response.errors);
+        return;
+      }
+
+      authenticated = true;
       hub.access_token = response.access_token;
-      hub.authenticated = true;
       this.refresh_token = response.refresh_token || this.refresh_token;
 
       this.log(
         `Authenticated with local Wink hub (${hub.device.last_reading.ip_address})`
       );
-    } else {
-      hub.authenticated = false;
-      delete hub.access_token;
+
+    } catch (e) {
+      this.log("warn", errorMessage, e);
+    } finally {
+      hub.authenticated = authenticated;
+      if (!authenticated) {
+        delete hub.access_token;
+      }
     }
   }
 
@@ -194,10 +208,10 @@ export default class WinkClient {
           }
         },
         hub
-      ).catch(() => {
+      ).catch(e => {
         hub.authenticated = false;
         delete hub.access_token;
-        this.log("Local control failed, falling back to remote control");
+        this.log("warn", `Local control failed (${hub.device.last_reading.ip_address}), falling back to remote control`, e);
         return remote;
       });
 

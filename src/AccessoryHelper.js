@@ -112,7 +112,10 @@ export default class AccessoryHelper {
         }
         callback();
       })
-      .catch(callback);
+      .catch(e => {
+        this.log("error", `Failed to update device: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`, e);
+        callback(e);
+      });
   }
 
   updateAccessoryState(accessory, reachability = true) {

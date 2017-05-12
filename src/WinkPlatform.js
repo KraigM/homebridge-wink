@@ -30,7 +30,7 @@ export default class WinkPlatform {
     this.interval = null;
     this.subscriptions = new Subscriptions();
 
-    this.subscriptions.on("device-list", () => this.reloadAccessories());
+    this.subscriptions.on("device-list", () => this.refreshDevices());
     this.subscriptions.on("device-update", this.updateDevice.bind(this));
 
     this.api.on("didFinishLaunching", this.didFinishLaunching.bind(this));
@@ -86,11 +86,11 @@ export default class WinkPlatform {
       });
 
       this.interval = setInterval(
-        () => this.reloadAccessories(),
+        () => this.refreshDevices(),
         60 * 60 * 1000
       );
 
-      this.reloadAccessories();
+      this.refreshDevices();
     }
   }
 
@@ -111,26 +111,32 @@ export default class WinkPlatform {
     this.subscriptions.subscribe(device.subscription);
   }
 
-  async reloadAccessories() {
-    this.log("Refreshing devices...");
-    const response = await this.client.getDevices();
+  async refreshDevices() {
+    try {
+      this.log("Refreshing devices...");
 
-    const data = this.annotateDevices(response.data);
-    const devices = data.filter(x => x.valid).map(x => x.device);
+      const response = await this.client.getDevices();
 
-    const toRemove = this.accessories.diffRemove(devices);
-    const toUpdate = this.accessories.intersection(devices);
-    const toAdd = this.accessories.diffAdd(devices);
-    const toIgnore = data.filter(x => !x.valid);
+      const data = this.annotateDevices(response.data);
+      const devices = data.filter(x => x.valid).map(x => x.device);
 
-    this.subscriptions.subscribe(response.subscription);
+      const toRemove = this.accessories.diffRemove(devices);
+      const toUpdate = this.accessories.intersection(devices);
+      const toAdd = this.accessories.diffAdd(devices);
+      const toIgnore = data.filter(x => !x.valid);
 
-    toRemove.forEach(this.removeAccessory, this);
-    toUpdate.forEach(this.updateDevice, this);
-    toAdd.forEach(this.addDevice, this);
-    toIgnore.forEach(this.ignoreDevice, this);
+      this.subscriptions.subscribe(response.subscription);
 
-    this.log("Devices refreshed.");
+      toRemove.forEach(this.removeAccessory, this);
+      toUpdate.forEach(this.updateDevice, this);
+      toAdd.forEach(this.addDevice, this);
+      toIgnore.forEach(this.ignoreDevice, this);
+
+      this.log("Devices refreshed");
+
+    } catch (e) {
+      this.log("error", "Failed to refresh devices.", e);
+    }
   }
 
   annotateDevices(devices) {
