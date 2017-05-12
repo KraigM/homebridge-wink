@@ -4,6 +4,7 @@ export default class Accessories {
   constructor() {
     this.comparator = this.comparator.bind(this);
     this._accessories = {};
+    this._ignored = {};
   }
 
   getAccessoryKey(accessory) {
@@ -14,6 +15,16 @@ export default class Accessories {
   get(device) {
     const key = this.getAccessoryKey(device);
     return this._accessories[key];
+  }
+
+  ignore(device) {
+    const key = this.getAccessoryKey(device);
+    if (this._ignored[key]) {
+      return false;
+    }
+
+    this._ignored[key] = device;
+    return true;
   }
 
   add(accessory) {

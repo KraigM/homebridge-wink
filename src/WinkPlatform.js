@@ -62,6 +62,7 @@ export default class WinkPlatform {
   configureAccessory(accessory) {
     this.patchAccessory(accessory);
     this.accessories.add(accessory);
+    this.log(`Loaded from cache: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`);
   }
 
   patchAccessory(accessory) {
@@ -100,6 +101,7 @@ export default class WinkPlatform {
     this.accessoryHelper.configureAccessory(accessory);
     this.api.registerPlatformAccessories(pluginName, platformName, [accessory]);
     this.accessories.add(accessory);
+    this.log(`Added: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`);
   }
 
   updateDevice(device) {
@@ -110,41 +112,70 @@ export default class WinkPlatform {
   }
 
   async reloadAccessories() {
+    this.log("Refreshing devices...");
     const response = await this.client.getDevices();
-    const devices = this.filterDevices(response.data);
+
+    const data = this.annotateDevices(response.data);
+    const devices = data.filter(x => x.valid).map(x => x.device);
 
     const toRemove = this.accessories.diffRemove(devices);
     const toUpdate = this.accessories.intersection(devices);
     const toAdd = this.accessories.diffAdd(devices);
+    const toIgnore = data.filter(x => !x.valid);
 
     this.subscriptions.subscribe(response.subscription);
 
     toRemove.forEach(this.removeAccessory, this);
     toUpdate.forEach(this.updateDevice, this);
     toAdd.forEach(this.addDevice, this);
+    toIgnore.forEach(this.ignoreDevice, this);
 
-    this.log(
-      `Devices refreshed: ${toAdd.length} added, ${toUpdate.length} updated, ` +
-        `${toRemove.length} removed, ${response.data.length - devices.length} ignored.`
-    );
+    this.log("Devices refreshed.");
   }
 
-  filterDevices(devices) {
-    return devices
-      .map(device => ({
+  annotateDevices(devices) {
+    return devices.filter(device => device.object_type !== "hub").map(device => {
+      const definition = this.definitions[device.object_type];
+      const isSupported = !!definition;
+
+      const hide_groups = isSupported && (
+        this.config.hide_groups.indexOf(definition.group) !== -1 ||
+        this.config.hide_groups.indexOf(definition.type) !== -1
+      );
+
+      const hide_ids = isSupported && this.config.hide_ids.indexOf(device.object_id) !== -1;
+
+      return {
         device,
-        definition: this.definitions[device.object_type]
-      }))
-      .filter(data => !!data.definition)
-      .filter(
-        data =>
-          this.config.hide_groups.indexOf(data.definition.group) === -1 ||
-          this.config.hide_groups.indexOf(data.definition.type) === -1
-      )
-      .filter(
-        data => this.config.hide_ids.indexOf(data.device.object_id) === -1
-      )
-      .map(data => data.device);
+        definition,
+        isSupported,
+        hide_groups,
+        hide_ids,
+        valid: isSupported && !(hide_groups || hide_ids)
+      };
+    });
+  }
+
+  ignoreDevice(data) {
+    if (!this.accessories.ignore(data.device)) {
+      return;
+    }
+
+    let reason = null;
+
+    if (!data.isSupported) {
+      reason = "Not supported by HomeKit";
+    }
+    else if (data.hide_groups) {
+      reason = "Hidden by hide_groups config option";
+    }
+    else if (data.hide_ids) {
+      reason = "Hidden by hide_ids config option";
+    }
+
+    if (reason) {
+      this.log(`${reason}: ${data.device.name} (${data.device.object_type}/${data.device.object_id})`);
+    }
   }
 
   removeAccessory(accessory) {
@@ -152,6 +183,7 @@ export default class WinkPlatform {
       this.api.unregisterPlatformAccessories(pluginName, platformName, [
         accessory
       ]);
+      this.log(`Removed: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`);
     }
   }
 }
