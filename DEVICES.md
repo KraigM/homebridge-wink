@@ -58,11 +58,15 @@ Limitations:
 
 _Spotter, Tripper and other PIR and Door/Window Sensors_
 
-* PIR reports as Motion Detector
-* Tripper and other Door Sensors report as Doors by default. However, can be added to HomeKit as a window:
+* The following sensors are supported:
+  * Humidity sensor
+  * Motion sensor (PIR reports as Motion Detector)
+  * Occupancy sensor
+  * Temperature sensor
+  * Water sensor (leak detector)
+* Door Sensors report as Doors by default. However, can be added to HomeKit as a window:
   * using `window_ids` optional configuration field, or
   * automatically if device's name contains the word "window" (such as "Living Room Window")
-* Spotter reports Temperature and Humidity to HomeKit.
 * Reports Battery Level (where available).
 
 Limitations:

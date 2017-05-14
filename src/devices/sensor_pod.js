@@ -58,6 +58,16 @@ export default ({ Characteristic, Service }) => {
         ]
       },
       {
+        service: Service.LeakSensor,
+        supported: state => state.liquid_detected !== undefined,
+        characteristics: [
+          {
+            characteristic: Characteristic.LeakDetected,
+            get: state => state.liquid_detected
+          }
+        ]
+      },
+      {
         service: Service.TemperatureSensor,
         supported: state => state.temperature !== undefined,
         characteristics: [
