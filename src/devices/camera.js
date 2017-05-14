@@ -37,8 +37,8 @@ export default ({ Characteristic, Service }) => {
           },
           {
             characteristic: Characteristic.SecuritySystemTargetState,
-            get: state => {
-              switch (state.mode) {
+            get: (state, desired_state) => {
+              switch (desired_state.mode) {
                 case "away":
                   return Characteristic.SecuritySystemTargetState.AWAY_ARM;
                 case "night":
