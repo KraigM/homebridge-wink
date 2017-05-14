@@ -25,6 +25,19 @@ Limitations:
 
 * Does not report actual power usage due to limitation in HomeKit Interface.
 
+## Cameras
+
+_Arlo, Canary, Nest Cam_
+
+* Added to HomeKit as motion detector.
+* Canary is added to HomeKit as security system:
+  * Allows user to set the operating mode (armed, disarmed, etc).
+
+Limitations:
+
+* Can not view video feed.
+* Cameras other than Canary are not added as a security system (as I'm not sure which modes each camera supports and how they map to HomeKit states).
+
 ## Garage Doors
 
 * Open/Close Wink-connected garage doors.
