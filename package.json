@@ -22,6 +22,8 @@
     "lint": "eslint .",
     "prettier": "prettier --write src/**/*.js",
     "precommit": "lint-staged",
+    "prepublish": "npm run build",
+    "prestart": "npm run build",
     "start": "homebridge -D -P . -U ."
   },
   "lint-staged": {
