@@ -45,7 +45,7 @@ export default class AccessoryHelper {
 
   configureAccessory(accessory, reachability) {
     this.configureAccessoryCharacteristics(accessory);
-    this.updateAccessoryState(accessory, reachability);
+    this.updateAccessoryState(accessory, null, reachability);
   }
 
   configureAccessoryCharacteristics(accessory) {
@@ -104,40 +104,57 @@ export default class AccessoryHelper {
     this.onChange(accessory, state)
       .then(response => {
         if (response) {
-          accessory.context.desired_state = {
-            ...accessory.context.desired_state,
-            ...response.data.desired_state
-          };
-          this.updateAccessoryState(accessory);
+          this.updateAccessoryState(accessory, {
+            ...accessory.context,
+            desired_state: {
+              ...accessory.context.desired_state,
+              ...response.data.desired_state
+            }
+          });
         }
         callback();
       })
       .catch(e => {
-        this.log("error", `Failed to update device: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`, e);
+        this.log(
+          "error",
+          `Failed to update device: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`,
+          e
+        );
         callback(e);
       });
   }
 
-  updateAccessoryState(accessory, reachability = true) {
-    accessory.definition.services.forEach(definition => {
-      const service = accessory.getService(definition.service);
+  updateAccessoryState(accessory, device, reachability = true) {
+    const context = accessory.context;
+    const mergedValues1 = accessory.merged_state;
+    const mergedValues2 = device && {
+      ...device.last_reading,
+      ...device.desired_state
+    };
 
-      definition.characteristics.forEach(c => {
-        if (c.available && !c.available(accessory.context.last_reading)) {
+    if (device) {
+      accessory.context = device;
+    }
+
+    accessory.definition.services.forEach(s => {
+      const service = accessory.getService(s.service);
+
+      s.characteristics.filter(c => c.get).forEach(c => {
+        const oldValue = c.get(context.last_reading, mergedValues1);
+        const newValue = device && c.get(device.last_reading, mergedValues2);
+
+        if (device && oldValue === newValue) {
           return;
         }
 
         const characteristic = service.getCharacteristic(c.characteristic);
-
-        characteristic && c.get && characteristic.getValue();
+        characteristic && characteristic.getValue();
       });
     });
 
-    if (
-      reachability &&
-      accessory.context.last_reading.connection !== undefined
-    ) {
-      accessory.updateReachability(accessory.context.last_reading.connection);
+    const rDevice = device || (reachability && accessory.context);
+    if (rDevice && rDevice.last_reading.connection !== undefined) {
+      accessory.updateReachability(rDevice.last_reading.connection);
     }
   }
 }
