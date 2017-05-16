@@ -31,7 +31,12 @@ export default class WinkPlatform {
     this.subscriptions = new Subscriptions();
 
     this.subscriptions.on("device-list", () => this.refreshDevices());
-    this.subscriptions.on("device-update", this.updateDevice.bind(this));
+    this.subscriptions.on("device-update", device => {
+      this.log(
+        `Received update notification: ${device.name} (${device.object_type}/${device.object_id})`
+      );
+      this.updateDevice(device);
+    });
 
     this.api.on("didFinishLaunching", this.didFinishLaunching.bind(this));
   }
@@ -105,10 +110,6 @@ export default class WinkPlatform {
   }
 
   updateDevice(device) {
-    this.log(
-      `Received update: ${device.name} (${device.object_type}/${device.object_id})`
-    );
-
     const accessory = this.accessories.get(device);
     this.accessoryHelper.updateAccessoryState(accessory, device);
     this.subscriptions.subscribe(device.subscription);

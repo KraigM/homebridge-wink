@@ -223,6 +223,11 @@ export default class WinkClient {
       requests.push(local);
     }
 
-    return Promise.race(requests);
+    return Promise.race(requests).then(response => {
+      this.log(
+        `Update sent successfully: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`
+      );
+      return response;
+    });
   }
 }
