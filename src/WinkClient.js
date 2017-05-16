@@ -111,7 +111,6 @@ export default class WinkClient {
     const errorMessage = `Wink hub (${hub.device.last_reading.ip_address}) is not reachable locally`;
 
     try {
-
       const response = await this.request(
         {
           method: "GET",
@@ -127,7 +126,6 @@ export default class WinkClient {
       if (!hub.reachable) {
         this.log("warn", errorMessage);
       }
-
     } catch (e) {
       hub.reachable = false;
       this.log("warn", errorMessage, e);
@@ -145,7 +143,6 @@ export default class WinkClient {
     let authenticated = false;
 
     try {
-
       const response = await this.request({
         method: "POST",
         uri: "/oauth2/token",
@@ -171,7 +168,6 @@ export default class WinkClient {
       this.log(
         `Authenticated with local Wink hub (${hub.device.last_reading.ip_address})`
       );
-
     } catch (e) {
       this.log("warn", errorMessage, e);
     } finally {
@@ -183,6 +179,11 @@ export default class WinkClient {
   }
 
   updateDevice(accessory, state) {
+    this.log(
+      `Sending update: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`,
+      state
+    );
+
     this.nonce += 5;
 
     const remote = this.request({
@@ -211,7 +212,11 @@ export default class WinkClient {
       ).catch(e => {
         hub.authenticated = false;
         delete hub.access_token;
-        this.log("warn", `Local control failed (${hub.device.last_reading.ip_address}), falling back to remote control`, e);
+        this.log(
+          "warn",
+          `Local control failed (${hub.device.last_reading.ip_address}), falling back to remote control`,
+          e
+        );
         return remote;
       });
 
