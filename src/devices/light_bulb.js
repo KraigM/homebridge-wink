@@ -24,10 +24,10 @@ export default ({ Characteristic, Service }) => {
             set: (value, accessory) => {
               const values = accessory.merged_values;
               return {
-                brightness: values.brightness || values.brightness,
+                brightness: values.brightness,
                 color_model: "hsb",
                 hue: value / 360,
-                saturation: values.saturation || values.saturation
+                saturation: values.saturation
               };
             }
           },
@@ -38,9 +38,9 @@ export default ({ Characteristic, Service }) => {
             set: (value, accessory) => {
               const values = accessory.merged_values;
               return {
-                brightness: values.brightness || values.brightness,
+                brightness: values.brightness,
                 color_model: "hsb",
-                hue: values.hue || values.hue,
+                hue: values.hue,
                 saturation: value / 360
               };
             }
