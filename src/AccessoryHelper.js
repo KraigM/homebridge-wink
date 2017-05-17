@@ -17,27 +17,23 @@ export default class AccessoryHelper {
     );
   }
 
-  getDefinition(accessory) {
-    const definition = this.definitions[accessory.context.object_type];
-    const last_reading = accessory.context.last_reading;
+  getDefinition(device) {
+    const definition = this.definitions[device.object_type];
+    const last_reading = device.last_reading;
     return {
       ...definition,
       services: definition.services
         .filter(
           service =>
             !service.supported ||
-            service.supported(last_reading, accessory.context, this.config)
+            service.supported(last_reading, device, this.config)
         )
         .map(service => ({
           ...service,
           characteristics: service.characteristics.filter(
             characteristic =>
               !characteristic.supported ||
-              characteristic.supported(
-                last_reading,
-                accessory.context,
-                this.config
-              )
+              characteristic.supported(last_reading, device, this.config)
           )
         }))
     };
