@@ -67,7 +67,7 @@ export default class WinkClient {
       this.log("Authenticated with wink.com");
       return true;
     } catch (e) {
-      this.log("error", "Could not authenticate with wink.com", e);
+      this.log.error("Could not authenticate with wink.com", e);
       return false;
     }
   }
@@ -124,11 +124,11 @@ export default class WinkClient {
       hub.reachable = response.indexOf("wink.com") !== -1;
 
       if (!hub.reachable) {
-        this.log("warn", errorMessage);
+        this.log.warn(errorMessage);
       }
     } catch (e) {
       hub.reachable = false;
-      this.log("warn", errorMessage, e);
+      this.log.warn(errorMessage, e);
     }
 
     return hub.reachable;
@@ -157,7 +157,7 @@ export default class WinkClient {
       });
 
       if (response.errors && response.errors.length) {
-        this.log("warn", errorMessage, response.errors);
+        this.log.warn(errorMessage, response.errors);
         return;
       }
 
@@ -169,7 +169,7 @@ export default class WinkClient {
         `Authenticated with local Wink hub (${hub.device.last_reading.ip_address})`
       );
     } catch (e) {
-      this.log("warn", errorMessage, e);
+      this.log.warn(errorMessage, e);
     } finally {
       hub.authenticated = authenticated;
       if (!authenticated) {

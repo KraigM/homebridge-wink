@@ -138,7 +138,7 @@ export default class WinkPlatform {
 
       this.log("Devices refreshed");
     } catch (e) {
-      this.log("error", "Failed to refresh devices.", e);
+      this.log.error("Failed to refresh devices.", e);
     }
   }
 
