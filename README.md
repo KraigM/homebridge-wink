@@ -30,7 +30,7 @@ Yet another Wink plugin for [homebridge](https://github.com/nfarina/homebridge).
 ]
 ```
 
-| Parameter       | Required | Second Header                                  |
+| Parameter       | Required | Notes                                          |
 | --------------- | -------- | ---------------------------------------------- |
 | `platform`      | X        | Must always be "Wink".                         |
 | `name`          | X        | Can be anything.                               |
