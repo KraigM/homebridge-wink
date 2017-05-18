@@ -65,7 +65,7 @@ export default class WinkPlatform {
   }
 
   configureAccessory(accessory) {
-    this.patchAccessory(accessory, accessory.context);
+    this.patchAccessory(accessory);
     this.accessories.add(accessory);
     this.log(
       `Loaded from cache: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`
@@ -73,7 +73,12 @@ export default class WinkPlatform {
   }
 
   patchAccessory(accessory, device) {
-    accessory.definition = this.accessoryHelper.getDefinition(device);
+    if (device) {
+      accessory.context = device;
+    }
+    accessory.definition = this.accessoryHelper.getDefinition(
+      accessory.context
+    );
     Object.defineProperty(accessory, "merged_state", {
       get: function() {
         return {
