@@ -37,6 +37,9 @@ export default class WinkPlatform {
       );
       this.updateDevice(device);
     });
+    this.subscriptions.on("unknown-message", message => {
+      this.log.warn("Received unknown notification:", message);
+    });
 
     this.api.on("didFinishLaunching", this.didFinishLaunching.bind(this));
   }

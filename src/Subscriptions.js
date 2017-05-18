@@ -38,16 +38,26 @@ export default class Subscriptions extends EventEmitter {
   }
 
   onMessage(message) {
-    const data = typeof message.message !== "string"
+    const msg = typeof message.message !== "string"
       ? message.message
       : JSON.parse(message.message);
 
-    if (data.uuid) {
-      this.emit("device-update", data);
+    this.emit("message", msg);
+
+    if (
+      msg.uuid &&
+      msg.name &&
+      msg.object_type &&
+      msg.object_id &&
+      msg.last_reading
+    ) {
+      return this.emit("device-update", msg);
     }
 
-    if (data.data) {
-      this.emit("device-list", data);
+    if (msg.data && Array.isArray(msg.data)) {
+      return this.emit("device-list", msg);
     }
+
+    this.emit("unknown-message", msg);
   }
 }
