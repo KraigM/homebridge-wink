@@ -1,3 +1,13 @@
+const isFan = (state, device, config) => {
+  if (config.fan_ids.indexOf(device.object_id) !== -1) {
+    return true;
+  }
+
+  return /\bfan\b/i.test(device.name);
+};
+
+const isLightBulb = (state, device, config) => !isFan(state, device, config);
+
 export default ({ Characteristic, Service }) => {
   return {
     type: "light_bulb",
@@ -5,6 +15,7 @@ export default ({ Characteristic, Service }) => {
     services: [
       {
         service: Service.Lightbulb,
+        supported: isLightBulb,
         characteristics: [
           {
             characteristic: Characteristic.On,
@@ -44,6 +55,23 @@ export default ({ Characteristic, Service }) => {
                 saturation: value / 360
               };
             }
+          }
+        ]
+      },
+      {
+        service: Service.Fan,
+        supported: isFan,
+        characteristics: [
+          {
+            characteristic: Characteristic.On,
+            get: state => state.powered,
+            set: value => ({ powered: !!value })
+          },
+          {
+            characteristic: Characteristic.RotationSpeed,
+            supported: state => state.brightness !== undefined,
+            get: state => Math.floor(state.brightness * 100),
+            set: value => ({ brightness: value / 100 })
           }
         ]
       }
