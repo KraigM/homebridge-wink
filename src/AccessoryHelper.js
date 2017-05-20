@@ -95,7 +95,7 @@ export default class AccessoryHelper {
   }
 
   writeAccessory(accessory, set, value, callback) {
-    const state = set(value, accessory.merged_state);
+    const state = set(value, accessory);
 
     this.onChange(accessory, state)
       .then(response => {
