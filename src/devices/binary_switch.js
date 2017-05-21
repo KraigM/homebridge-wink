@@ -1,10 +1,5 @@
-const isFan = (state, device, config) => {
-  if (config.fan_ids.indexOf(device.object_id) !== -1) {
-    return true;
-  }
-
-  return /\bfan\b/i.test(device.name);
-};
+const isFan = (state, device, config) =>
+  config.fan_ids.indexOf(device.object_id) !== -1;
 
 const isLightBulb = (state, device, config) =>
   !isFan(state, device, config) && state.consumption === undefined;

@@ -17,9 +17,7 @@ _Z-Wave non-dimming switches, Wink Outlink, Wink Relay_
 
 * On/Off Functions.
 * For the Outlink, uses the power usage to determine if on or off.
-* Can be added to HomeKit as a fan:
-  * using `fan_ids` optional configuration field, or
-  * automatically if device's name contains the word "fan" (such as "Living Room Fan")
+* Can be added to HomeKit as a fan, using `fan_ids` optional configuration field
 
 Limitations:
 
@@ -53,9 +51,7 @@ _Light Bulbs and dimmable switches_
 
 * On/Off and Dimming.
 * Bulbs with support allow Hue and Saturation.
-* Can be added to HomeKit as a fan:
-  * using `fan_ids` optional configuration field, or
-  * automatically if device's name contains the word "fan" (such as "Living Room Fan")
+* Can be added to HomeKit as a fan, using `fan_ids` optional configuration field
 
 ## Locks
 
