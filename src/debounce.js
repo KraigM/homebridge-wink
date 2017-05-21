@@ -8,39 +8,48 @@ class Debouncer {
     });
 
     this.func = options.func;
+    this.key = options.key;
     this.reduceArgs = options.reduceArgs;
     this.wait = options.wait;
 
-    this.prevArgs = null;
-    this.prevResolve = null;
-    this.timeout = null;
+    this.keys = {};
   }
 
-  clear() {
-    clearTimeout(this.timeout);
-    this.prevResolve && this.prevResolve();
+  clear(data) {
+    clearTimeout(data.timeout);
+    data.prevResolve && data.prevResolve();
 
-    this.prevResolve = null;
-    this.timeout = null;
+    data.prevResolve = null;
+    data.timeout = null;
   }
 
   call() {
-    this.clear();
+    const key = this.key.apply(this, arguments);
+
+    if (!this.keys[key]) {
+      this.keys[key] = {
+        prevArgs: null,
+        prevResolve: null,
+        timeout: null
+      };
+    }
+
+    const data = this.keys[key];
+
+    this.clear(data);
 
     return new Promise((resolve, reject) => {
-      const args = this.prevArgs
-        ? this.reduceArgs(this.prevArgs || [], [...arguments])
+      const args = data.prevArgs
+        ? this.reduceArgs(data.prevArgs || [], [...arguments])
         : [...arguments];
 
-      this.timeout = setTimeout(() => {
-        this.prevArgs = null;
-        this.prevResolve = null;
-        this.timeout = null;
+      data.timeout = setTimeout(() => {
+        delete this.keys[key];
         this.func.apply(undefined, args).then(resolve).catch(reject);
       }, this.wait);
 
-      this.prevArgs = args;
-      this.prevResolve = resolve;
+      data.prevArgs = args;
+      data.prevResolve = resolve;
     });
   }
 }

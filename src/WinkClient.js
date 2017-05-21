@@ -18,6 +18,7 @@ export default class WinkClient {
     this.nonce = 1000000;
     this.updateDevice = debounce({
       func: this.updateDevice.bind(this),
+      key: accessory => accessory.context.uuid,
       reduceArgs: (oldArgs, newArgs) => [
         newArgs[0],
         { ...oldArgs[1], ...newArgs[1] }
