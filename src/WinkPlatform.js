@@ -1,8 +1,11 @@
+import childProcess from "child_process";
+import compareVersions from "compare-versions";
 import Accessories from "./Accessories";
 import AccessoryHelper from "./AccessoryHelper";
 import devices from "./devices";
 import Subscriptions from "./Subscriptions";
 import WinkClient from "./WinkClient";
+import pkg from "../package.json";
 
 export const pluginName = "homebridge-wink";
 export const platformName = "Wink";
@@ -17,6 +20,8 @@ export default class WinkPlatform {
     this.log = log;
     this.config = this.cleanConfig(config);
     this.api = api;
+
+    this.checkVersion();
 
     this.definitions = devices(api.hap);
     this.accessories = new Accessories();
@@ -42,6 +47,17 @@ export default class WinkPlatform {
     });
 
     this.api.on("didFinishLaunching", this.didFinishLaunching.bind(this));
+  }
+
+  checkVersion() {
+    childProcess.exec(`npm view ${pkg.name} version`, (error, stdout) => {
+      const latestVersion = stdout && stdout.trim();
+      if (latestVersion && compareVersions(stdout.trim(), pkg.version)) {
+        this.log.warn(
+          `NOTICE: New version of ${pkg.name} available: ${latestVersion}`
+        );
+      }
+    });
   }
 
   cleanConfig(config) {
