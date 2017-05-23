@@ -64,6 +64,7 @@ export default class WinkPlatform {
     const newConfig = {
       client_id: "quirky_wink_android_app",
       client_secret: "e749124ad386a5a35c0ab554a4f2c045",
+      debug: false,
       direct_access: true,
       fan_ids: [],
       hide_groups: [],

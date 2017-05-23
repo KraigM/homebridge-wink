@@ -10,6 +10,7 @@ export default class WinkClient {
       username: config.username,
       password: config.password
     };
+    this.debug = config.debug;
     this.direct_access = config.direct_access;
 
     this.access_token = null;
@@ -129,7 +130,7 @@ export default class WinkClient {
       }
     } catch (e) {
       hub.reachable = false;
-      this.log.warn(errorMessage, e);
+      this.log.warn(`${errorMessage}.`, (!this.debug && e.message) || e);
     }
 
     return hub.reachable;
