@@ -6,6 +6,7 @@ Yet another Wink plugin for [homebridge](https://github.com/nfarina/homebridge).
 * Subscribes to Wink push notifications, instead of polling for device updates.
 * Written in ES7 (arrow functions, async/await, classes).
 * Accessory services and characteristics are defined declaratively.
+* Supports 3 methods of [authentication](#authentication) including API tokens obtained from [developer.wink.com](https://developer.wink.com)
 
 ## Installation
 
@@ -34,15 +35,52 @@ Yet another Wink plugin for [homebridge](https://github.com/nfarina/homebridge).
 | --------------- | -------- | ---------------------------------------------- |
 | `platform`      | X        | Must always be "Wink".                         |
 | `name`          | X        | Can be anything.                               |
-| `username`      | X        |                                                |
-| `password`      | X        |                                                |
-| `client_id`     |          | Client ID permitted to use password grant.     |
-| `client_secret` |          | Only required if you're providing a Client ID. |
+| `client_id`     | *        | See [Authentication](#authentication) |
+| `client_secret` | *        | See [Authentication](#authentication) |
+| `username`     | *        | See [Authentication](#authentication) |
+| `password` | *        | See [Authentication](#authentication) |
 | `hide_groups`   |          | List of Wink Device Groups/Types that will be hidden from Homebridge. (see Device Support table below) |
 | `hide_ids`      |          | List of Wink IDs that will be hidden from Homebridge. |
 | `fan_ids`       |          | List of Wink IDs (for binary switches or light switches/dimmers) that will be added as fans to Homebridge. |
 | `window_ids`    |          | List of Wink IDs that will be added as windows (instead of doors) to Homebridge. |
 | `direct_access` |          | Attempt to establish direct communication with the Wink hub. Defaults to `true`. |
+
+## Authentication
+
+homebridge-wink3 supports 3 methods of authentication.
+
+* [OAuth Authorization Code](#oauth-authorization-code)
+* [OAuth Password Grant](#oauth-password-grant)
+* [Android client ID](#android-client-id)
+
+#### OAuth Authorization Code
+
+This is the method of authentication preferred by Wink. Using API credentials obtained from [developer.wink.com](https://developer.wink.com), the plugin will direct the user to authenticate via the wink.com at startup.
+
+You need to provide the following configuration options: `client_id` and `client_secret`
+
+##### Obtaining a Client ID and secret
+
+1. Create an account at [developer.wink.com](https://developer.wink.com)
+2. [Create an application](https://developer.wink.com/clients/new), with the following information:
+  * Name: Homebridge
+  * Website: https://github.com/sibartlett/homebridge-wink3
+  * Redirect URI: http://<HOMEBRIDGE_IP>:8888
+  * Check "I agree to the terms and conditions"
+3. Wait for the application to be approved (may take hours)
+4. Once approved, the Client ID and Secret can be seen [here](https://developer.wink.com/clients).
+
+#### OAuth Password Grant
+
+If you have old Wink API credentials that support OAuth password grant.
+
+You need to provide the following configuration options: `client_id`, `client_secret`, `username` and `password`
+
+#### Android client ID
+
+If you'd prefer to use the client ID and secret associated with Wink's Android app.
+
+You need to provide the following configuration options: `username` and `password`
 
 ## Device support
 
