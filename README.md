@@ -8,6 +8,17 @@ Yet another Wink plugin for [homebridge](https://github.com/nfarina/homebridge).
 * Accessory services and characteristics are defined declaratively.
 * Supports 3 methods of [authentication](#authentication) including API tokens obtained from [developer.wink.com](https://developer.wink.com)
 
+## Contents
+
+1. [Installation](#installation)
+2. [Configuration](#configuration)
+3. [Authentication](#authentication)
+    1. [OAuth Authorization Code](#oauth-authorization-code)
+    2. [OAuth Password Grant](#oauth-password-grant)
+    3. [Android client ID](#android-client-id)
+4. [Device support](#device-support)
+5. [Acknowledgements](#acknowledgements)
+
 ## Installation
 
 1. Install homebridge: `npm install -g homebridge`
