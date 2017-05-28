@@ -117,7 +117,9 @@ export default class WinkClient {
       const redirectUri = `http://${ipAddress}:8888`;
       const state = Date.now().toString();
 
-      this.log.warn(`To authenticate, go to this URL: ${redirectUri}`);
+      this.log.warn(
+        `To authenticate, go here using a web browser: ${redirectUri}`
+      );
 
       const server = http.createServer((request, response) => {
         const { query } = url.parse(request.url, true);
