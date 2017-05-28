@@ -1,20 +1,21 @@
+import fs from "fs";
+import http from "http";
+import path from "path";
+import url from "url";
+import ip from "ip";
 import request from "request-promise-native";
 import debounce from "./debounce";
 
+const android_client_id = "quirky_wink_android_app";
+const android_client_secret = "e749124ad386a5a35c0ab554a4f2c045";
+
 export default class WinkClient {
-  constructor(log, config) {
+  constructor({ config, log, updateConfig }) {
+    this.config = config;
     this.log = log;
-    this.credentials = {
-      client_id: config.client_id,
-      client_secret: config.client_secret,
-      username: config.username,
-      password: config.password
-    };
-    this.debug = config.debug;
+    this.updateConfig = updateConfig;
     this.direct_access = config.direct_access;
 
-    this.access_token = null;
-    this.refresh_token = null;
     this.hubs = {};
     this.nonce = 1000000;
     this.updateDevice = debounce({
@@ -28,7 +29,7 @@ export default class WinkClient {
   }
 
   request(options, hub) {
-    const accessToken = hub ? hub.access_token : this.access_token;
+    const accessToken = hub ? hub.access_token : this.config.access_token;
     const headers = {
       "User-Agent": "Manufacturer/Apple-iPhone8_1 iOS/10.3.1 WinkiOS/5.8.0.27-production-release (Scale/2.00)"
     };
@@ -48,24 +49,114 @@ export default class WinkClient {
         ...headers,
         ...options.headers
       }
+    }).catch(err => {
+      if (err.statusCode === 401 && this.config.refresh_token) {
+        return this.refreshToken().then(() => this.request(options, hub));
+      }
+
+      return Promise.reject(err);
+    });
+  }
+
+  getToken(data) {
+    return request({
+      method: "POST",
+      baseUrl: "https://api.wink.com",
+      uri: "/oauth2/token",
+      body: data,
+      json: true
+    }).then(response => {
+      this.updateConfig({
+        access_token: response.access_token,
+        refresh_token: response.refresh_token
+      });
+    });
+  }
+
+  refreshToken() {
+    this.log("Refreshing access token...");
+    return this.getToken({
+      grant_type: "refresh_token",
+      client_id: this.config.client_id || android_client_id,
+      client_secret: this.config.client_secret || android_client_secret,
+      refresh_token: this.config.refresh_token
+    })
+      .then(response => {
+        this.log("Refreshed access token");
+        return response;
+      })
+      .catch(err => {
+        if (err.statusCode === 400) {
+          this.updateConfig({
+            access_token: undefined,
+            refresh_token: undefined
+          });
+
+          return Promise.reject(
+            "Restart Homebridge, Wink needs to be re-authenticated."
+          );
+        }
+
+        return Promise.reject(err);
+      });
+  }
+
+  getOauthGrant() {
+    return new Promise(resolve => {
+      if (this.config.username && this.config.password) {
+        return resolve({
+          grant_type: "password",
+          client_id: this.config.client_id || android_client_id,
+          client_secret: this.config.client_secret || android_client_secret,
+          username: this.config.username,
+          password: this.config.password
+        });
+      }
+
+      const ipAddress = ip.address("public", "ipv4");
+      const redirectUri = `http://${ipAddress}:8888`;
+      const state = Date.now().toString();
+
+      this.log.warn(`To authenticate, go to this URL: ${redirectUri}`);
+
+      const server = http.createServer((request, response) => {
+        const { query } = url.parse(request.url, true);
+
+        if (query.code && query.state === state) {
+          resolve({
+            grant_type: "code",
+            client_secret: this.config.client_secret,
+            code: query.code
+          });
+
+          const filePath = path.join(__dirname, "../src/authenticated.html");
+          const file = fs.readFileSync(filePath);
+
+          response.writeHead(200, { "Content-Type": "text/html" });
+          response.end(file);
+          server.close();
+        } else {
+          response.writeHead(302, {
+            Location: `https://api.wink.com/oauth2/authorize?response_type=code&client_id=${this.config.client_id}&redirect_uri=${redirectUri}&state=${state}`
+          });
+          return response.end();
+        }
+      });
+
+      server.listen(8888);
     });
   }
 
   async authenticate() {
+    if (this.config.refresh_token) {
+      // Already autenticated
+      return true;
+    }
+
+    const data = await this.getOauthGrant();
+
     try {
-      const response = await this.request({
-        method: "POST",
-        uri: "/oauth2/token",
-        body: {
-          ...this.credentials,
-          grant_type: "password"
-        },
-        json: true
-      });
-
-      this.access_token = response.access_token;
-      this.refresh_token = response.refresh_token;
-
+      await this.getToken(data);
       this.log("Authenticated with wink.com");
       return true;
     } catch (e) {
@@ -130,7 +221,7 @@ export default class WinkClient {
       }
     } catch (e) {
       hub.reachable = false;
-      this.log.warn(`${errorMessage}.`, (!this.debug && e.message) || e);
+      this.log.warn(`${errorMessage}.`, (!this.config.debug && e.message) || e);
     }
 
     return hub.reachable;
@@ -152,9 +243,9 @@ export default class WinkClient {
           local_control_id: hub.device.last_reading.local_control_id,
           scope: "local_control",
           grant_type: "refresh_token",
-          refresh_token: this.refresh_token,
-          client_id: this.credentials.client_id,
-          client_secret: this.credentials.client_secret
+          refresh_token: this.config.refresh_token,
+          client_id: this.config.client_id || android_client_id,
+          client_secret: this.config.client_secret || android_client_secret
         }
       });
 
@@ -165,7 +256,6 @@ export default class WinkClient {
 
       authenticated = true;
       hub.access_token = response.access_token;
-      this.refresh_token = response.refresh_token || this.refresh_token;
 
       this.log(
         `Authenticated with local Wink hub (${hub.device.last_reading.ip_address})`

@@ -1,4 +1,6 @@
 import childProcess from "child_process";
+import fs from "fs";
+import _ from "lodash";
 import compareVersions from "compare-versions";
 import Accessories from "./Accessories";
 import AccessoryHelper from "./AccessoryHelper";
@@ -31,7 +33,11 @@ export default class WinkPlatform {
       hap: api.hap,
       onChange: this.handleAccessoryStateChange.bind(this)
     });
-    this.client = new WinkClient(log, this.config);
+    this.client = new WinkClient({
+      config: this.config,
+      log,
+      updateConfig: config => this.updateConfig(config)
+    });
     this.interval = null;
     this.subscriptions = new Subscriptions();
 
@@ -49,6 +55,17 @@ export default class WinkPlatform {
     this.api.on("didFinishLaunching", this.didFinishLaunching.bind(this));
   }
 
+  updateConfig(newConfig) {
+    const configPath = this.api.user.configPath();
+    const file = fs.readFileSync(configPath);
+    const config = JSON.parse(file);
+    const platConfig = config.platforms.find(x => x.name == this.config.name);
+    _.extend(platConfig, newConfig);
+    const serializedConfig = JSON.stringify(config, null, "  ");
+    fs.writeFileSync(configPath, serializedConfig, "utf8");
+    _.extend(this.config, newConfig);
+  }
+
   checkVersion() {
     childProcess.exec(`npm view ${pkg.name} version`, (error, stdout) => {
       const latestVersion = stdout && stdout.trim();
@@ -62,8 +79,6 @@ export default class WinkPlatform {
 
   cleanConfig(config) {
     const newConfig = {
-      client_id: "quirky_wink_android_app",
-      client_secret: "e749124ad386a5a35c0ab554a4f2c045",
       debug: false,
       direct_access: true,
       fan_ids: [],
@@ -154,7 +169,9 @@ export default class WinkPlatform {
       const toAdd = this.accessories.diffAdd(devices);
       const toIgnore = data.filter(x => !x.valid);
 
-      this.subscriptions.subscribe(response.subscription);
+      if (response.subscription) {
+        this.subscriptions.subscribe(response.subscription);
+      }
 
       toRemove.forEach(this.removeAccessory, this);
       toUpdate.forEach(this.updateDevice, this);
