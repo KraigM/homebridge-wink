@@ -17,6 +17,7 @@ Yet another Wink plugin for [homebridge](https://github.com/nfarina/homebridge).
     2. [OAuth Password Grant](#oauth-password-grant)
     3. [Android client ID](#android-client-id)
 4. [Device support](#device-support)
+4. [FAQ](#faq)
 5. [Acknowledgements](#acknowledgements)
 
 ## Installation
@@ -111,6 +112,17 @@ See [DEVICES.md](DEVICES.md) for more detailed information.
 | [Sirens](DEVICES.md#sirens)                     | `siren`           | `sirens`           |
 | [Smoke Detectors](DEVICES.md#smoke-detectors)   | `smoke_detector`  | `smoke_detectors`  |
 | [Thermostats](DEVICES.md#thermostats)           | `thermostat`      | `thermostats`      |
+
+
+## FAQ
+
+#### Chamberlain garage opener does not seem to response to commands
+
+Unfortunately, Chamberlain garage openers are only controllable when using [Android client ID authentication](#android-client-id). ([Source](https://github.com/python-wink/python-wink/issues/23#issuecomment-197431701))
+
+#### Is Pivot Power Genius supported?
+
+No, but checkout this other [plugin](https://www.npmjs.com/package/homebridge-pivot-power-genius).
 
 ## Acknowledgements
 
