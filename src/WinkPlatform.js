@@ -159,6 +159,9 @@ export default class WinkPlatform {
     try {
       this.log("Refreshing devices...");
 
+      // Request user - this should ensure that pubnub subscriptions don't stop working
+      await this.client.getUser();
+
       const response = await this.client.getDevices();
 
       const data = this.annotateDevices(response.data);

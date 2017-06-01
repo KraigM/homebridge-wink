@@ -167,6 +167,13 @@ export default class WinkClient {
     }
   }
 
+  getUser() {
+    return this.request({
+      method: "GET",
+      uri: "/users/me"
+    });
+  }
+
   async getDevices(object_type = "wink_device") {
     const response = await this.request({
       method: "GET",
