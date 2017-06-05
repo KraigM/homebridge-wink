@@ -28,12 +28,12 @@ export default ({ Characteristic, Service }) => {
             supported: state => state.hue !== undefined,
             get: state => Math.floor(state.hue * 360),
             set: (value, accessory) => {
-              const values = accessory.merged_values;
+              const state = accessory.merged_state;
               return {
-                brightness: values.brightness,
+                brightness: state.brightness,
                 color_model: "hsb",
                 hue: value / 360,
-                saturation: values.saturation
+                saturation: state.saturation
               };
             }
           },
@@ -42,11 +42,11 @@ export default ({ Characteristic, Service }) => {
             supported: state => state.saturation !== undefined,
             get: state => Math.floor(state.saturation * 100),
             set: (value, accessory) => {
-              const values = accessory.merged_values;
+              const state = accessory.merged_state;
               return {
-                brightness: values.brightness,
+                brightness: state.brightness,
                 color_model: "hsb",
-                hue: values.hue,
+                hue: state.hue,
                 saturation: value / 360
               };
             }
