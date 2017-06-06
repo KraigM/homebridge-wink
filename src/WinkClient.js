@@ -170,7 +170,10 @@ export default class WinkClient {
   getUser() {
     return this.request({
       method: "GET",
-      uri: "/users/me"
+      uri: "/users/me",
+      headers: {
+        "User-Agent": Date.now().toString()
+      }
     });
   }
 
