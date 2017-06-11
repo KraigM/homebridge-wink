@@ -68,7 +68,10 @@ export default class AccessoryHelper {
           return;
         }
 
-        const characteristic = service.getCharacteristic(c.characteristic);
+        const characteristic = this.getOrAddCharacteristic(
+          service,
+          c.characteristic
+        );
 
         if (c.get) {
           characteristic.on(
