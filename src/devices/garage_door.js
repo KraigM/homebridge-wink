@@ -30,7 +30,7 @@ export default ({ Characteristic, Service }) => {
             }
           },
           {
-            characteristic: Characteristic.GarageDoorOpener,
+            characteristic: Characteristic.ObstructionDetected,
             value: false
           }
         ]

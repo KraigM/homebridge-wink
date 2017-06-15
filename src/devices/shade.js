@@ -18,7 +18,7 @@ export default ({ Characteristic, Service }) => {
             get: state => state.position * 100
           },
           {
-            characteristic: Service.WindowCovering,
+            characteristic: Service.PositionState,
             value: Characteristic.PositionState.STOPPED
           }
         ]
