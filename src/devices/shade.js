@@ -11,7 +11,7 @@ export default ({ Characteristic, Service }) => {
           {
             characteristic: Characteristic.TargetPosition,
             get: (state, desired_state) => desired_state.position * 100,
-            set: value => value / 100
+            set: value => ({ position: value / 100 })
           },
           {
             characteristic: Characteristic.CurrentPosition,
