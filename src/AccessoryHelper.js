@@ -39,9 +39,9 @@ export default class AccessoryHelper {
     };
   }
 
-  configureAccessory(accessory, reachability) {
+  configureAccessory(accessory) {
     this.configureAccessoryCharacteristics(accessory);
-    this.updateAccessoryState(accessory, null, reachability);
+    this.updateAccessoryState(accessory);
   }
 
   configureAccessoryCharacteristics(accessory) {
@@ -123,7 +123,7 @@ export default class AccessoryHelper {
       });
   }
 
-  updateAccessoryState(accessory, device, reachability = true) {
+  updateAccessoryState(accessory, device) {
     const context = accessory.context;
     const mergedValues1 = accessory.merged_state;
     const mergedValues2 = device && {
@@ -150,10 +150,5 @@ export default class AccessoryHelper {
         characteristic && characteristic.getValue();
       });
     });
-
-    const rDevice = device || (reachability && accessory.context);
-    if (rDevice && rDevice.last_reading.connection !== undefined) {
-      accessory.updateReachability(rDevice.last_reading.connection);
-    }
   }
 }
