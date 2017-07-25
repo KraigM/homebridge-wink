@@ -61,7 +61,7 @@ Yet another Wink plugin for [homebridge](https://github.com/nfarina/homebridge).
 
 homebridge-wink3 supports 3 methods of authentication.
 
-* [OAuth Authorization Code](#oauth-authorization-code)
+* [OAuth Authorization Code](#oauth-authorization-code) (Preferred)
 * [OAuth Password Grant](#oauth-password-grant)
 * [Android client ID](#android-client-id)
 
@@ -70,6 +70,8 @@ homebridge-wink3 supports 3 methods of authentication.
 This is the method of authentication preferred by Wink. Using API credentials obtained from [developer.wink.com](https://developer.wink.com), the plugin will direct the user to authenticate via the wink.com at startup.
 
 You need to provide the following configuration options: `client_id` and `client_secret`
+
+Note: DO NOT use use `username` and `password` configuration options.
 
 ##### Obtaining a Client ID and secret
 
@@ -119,6 +121,10 @@ See [DEVICES.md](DEVICES.md) for more detailed information.
 #### Chamberlain garage opener does not seem to response to commands
 
 Unfortunately, Chamberlain garage openers are only controllable when using [Android client ID authentication](#android-client-id). ([Source](https://github.com/python-wink/python-wink/issues/23#issuecomment-197431701))
+
+#### GoControl garage opener does not seem to response to commands
+
+It has been reported that GoControl garage openers do not respond when using OAuth Password Grant, instead I recommend using [OAuth Authorization Code](#oauth-authorization-code). ([Source](https://github.com/sibartlett/homebridge-wink3/issues/21))
 
 #### Is Pivot Power Genius supported?
 
