@@ -36,6 +36,16 @@ Limitations:
 * Can not view video feed.
 * Cameras other than Canary are not added as a security system (as I'm not sure which modes each camera supports and how they map to HomeKit states).
 
+## Fans
+
+_Home Decorators Collection fans_
+
+* On/Off, rotation direction and speed.
+
+Limitations:
+
+* Can not control Comfort Breeze / auto mode.
+
 ## Garage Doors
 
 * Open/Close Wink-connected garage doors.
