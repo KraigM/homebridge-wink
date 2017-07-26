@@ -34,7 +34,8 @@ export default ({ Characteristic, Service }) => {
               }
             },
             set: value => ({
-              locked: value === true ||
+              locked:
+                value === true ||
                 value === Characteristic.LockTargetState.SECURED
             })
           }

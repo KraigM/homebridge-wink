@@ -36,9 +36,9 @@
     "compare-versions": "^3.0.1",
     "ip": "^1.1.5",
     "lodash": "^4.17.4",
-    "pubnub": "^4.10.0",
+    "pubnub": "^4.12.0",
     "request": "^2.81.0",
-    "request-promise-native": "^1.0.3",
+    "request-promise-native": "^1.0.4",
     "require-all": "^2.2.0",
     "source-map-support": "^0.4.15"
   },
@@ -46,14 +46,14 @@
     "babel-cli": "^6.24.1",
     "babel-eslint": "^7.2.3",
     "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-preset-env": "^1.5.1",
+    "babel-preset-env": "^1.6.0",
     "babel-preset-stage-2": "^6.24.1",
-    "eslint": "^3.19.0",
-    "eslint-config-prettier": "^2.1.1",
-    "eslint-plugin-prettier": "^2.1.1",
-    "husky": "^0.13.4",
-    "lint-staged": "^3.6.0",
-    "prettier": "^1.2.2",
+    "eslint": "^4.3.0",
+    "eslint-config-prettier": "^2.3.0",
+    "eslint-plugin-prettier": "^2.1.2",
+    "husky": "^0.14.3",
+    "lint-staged": "^4.0.2",
+    "prettier": "^1.5.3",
     "rimraf": "^2.6.1"
   }
 }
