@@ -129,7 +129,7 @@ export default class WinkPlatform {
 
     if (authenticated) {
       this.accessories.forEach(accessory => {
-        this.accessoryHelper.configureAccessory(accessory, false);
+        this.accessoryHelper.configureAccessory(accessory);
       });
 
       this.interval = setInterval(() => this.refreshDevices(), 60 * 60 * 1000);
