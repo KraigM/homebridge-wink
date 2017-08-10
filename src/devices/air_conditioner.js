@@ -67,7 +67,7 @@ export default ({ Characteristic, Service }) => {
           {
             characteristic: Characteristic.TemperatureDisplayUnits,
             get: state =>
-              state.units.temperature === "c"
+              state.units === "c"
                 ? Characteristic.TemperatureDisplayUnits.CELSIUS
                 : Characteristic.TemperatureDisplayUnits.FAHRENHEIT
           },

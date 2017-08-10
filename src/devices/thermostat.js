@@ -72,7 +72,23 @@ export default ({ Characteristic, Service }) => {
           },
           {
             characteristic: Characteristic.TargetTemperature,
-            get: (state, desired_state) => desired_state.min_set_point,
+            get: (state, desired_state) => {
+              if (desired_state.mode === "cool_only") {
+                return desired_state.max_set_point;
+              }
+
+              if (desired_state.mode === "auto") {
+                if (state.temperature > desired_state.max_set_point) {
+                  return desired_state.max_set_point;
+                } else if (state.temperature < desired_state.min_set_point) {
+                  return desired_state.min_set_point;
+                } else {
+                  return state.temperature;
+                }
+              }
+
+              return desired_state.min_set_point;
+            },
             set: value => ({
               min_set_point: value,
               max_set_point: value + 0.5555556
@@ -81,7 +97,7 @@ export default ({ Characteristic, Service }) => {
           {
             characteristic: Characteristic.TemperatureDisplayUnits,
             get: state =>
-              state.units.temperature === "c"
+              state.units === "c"
                 ? Characteristic.TemperatureDisplayUnits.CELSIUS
                 : Characteristic.TemperatureDisplayUnits.FAHRENHEIT
           },
