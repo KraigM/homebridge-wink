@@ -195,7 +195,7 @@ export default class WinkClient {
   processHubs(devices) {
     devices
       .filter(device => device.object_type === "hub")
-      .filter(device => !device.hidden_at)
+      .filter(device => !device.hidden_at && device.uuid != "[removed]")
       .filter(device => device.last_reading.ip_address)
       .forEach(async device => {
         const hub = this.addOrUpdateHub(device);

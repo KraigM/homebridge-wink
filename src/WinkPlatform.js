@@ -103,7 +103,8 @@ export default class WinkPlatform {
     this.patchAccessory(accessory);
     this.accessories.add(accessory);
     this.log(
-      `Loaded from cache: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`
+      `Loaded from cache: ${accessory.context.name} (${accessory.context
+        .object_type}/${accessory.context.object_id})`
     );
   }
 
@@ -145,7 +146,8 @@ export default class WinkPlatform {
     this.api.registerPlatformAccessories(pluginName, platformName, [accessory]);
     this.accessories.add(accessory);
     this.log(
-      `Added: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`
+      `Added: ${accessory.context.name} (${accessory.context
+        .object_type}/${accessory.context.object_id})`
     );
   }
 
@@ -190,7 +192,7 @@ export default class WinkPlatform {
   annotateDevices(devices) {
     return devices
       .filter(device => device.object_type !== "hub")
-      .filter(device => !device.hidden_at)
+      .filter(device => !device.hidden_at && device.uuid != "[removed]")
       .map(device => {
         const definition = this.definitions[device.object_type];
         const isSupported = !!definition;
@@ -231,7 +233,8 @@ export default class WinkPlatform {
 
     if (reason) {
       this.log(
-        `${reason}: ${data.device.name} (${data.device.object_type}/${data.device.object_id})`
+        `${reason}: ${data.device.name} (${data.device.object_type}/${data
+          .device.object_id})`
       );
     }
   }
@@ -242,7 +245,8 @@ export default class WinkPlatform {
         accessory
       ]);
       this.log(
-        `Removed: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`
+        `Removed: ${accessory.context.name} (${accessory.context
+          .object_type}/${accessory.context.object_id})`
       );
     }
   }
