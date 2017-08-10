@@ -216,8 +216,9 @@ export default class WinkClient {
   }
 
   async isHubReachable(hub) {
-    const errorMessage = `Wink hub (${hub.device.last_reading
-      .ip_address}) is not reachable locally`;
+    const hubName = `Wink hub (${hub.device.last_reading.ip_address})`;
+
+    this.log(`Checking if ${hubName} is reachable...`);
 
     try {
       const response = await this.request(
@@ -232,12 +233,23 @@ export default class WinkClient {
 
       hub.reachable = response.indexOf("wink.com") !== -1;
 
-      if (!hub.reachable) {
-        this.log.warn(errorMessage);
+      if (hub.reachable) {
+        this.log(`${hubName} is reachable locally`);
+      } else {
+        this.log.warn(
+          `${hubName} is reachable locally, but did not return expected response`
+        );
       }
     } catch (e) {
       hub.reachable = false;
-      this.log.warn(`${errorMessage}.`, (!this.config.debug && e.message) || e);
+      this.log.warn(
+        `${hubName} is not reachable locally.`,
+        (!this.config.debug && e.message) || e
+      );
+    }
+
+    if (!hub.reachable) {
+      this.log.warn(`Will continue without local control for ${hubName}`);
     }
 
     return hub.reachable;
