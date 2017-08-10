@@ -216,9 +216,9 @@ export default class WinkClient {
   }
 
   async isHubReachable(hub) {
-    const hubName = `Wink hub (${hub.device.last_reading.ip_address})`;
+    const hubName = `${hub.device.name}, ${hub.device.last_reading.ip_address}`;
 
-    this.log(`Checking if ${hubName} is reachable...`);
+    this.log(`Checking if hub is reachable (${hubName})...`);
 
     try {
       const response = await this.request(
@@ -234,22 +234,22 @@ export default class WinkClient {
       hub.reachable = response.indexOf("wink.com") !== -1;
 
       if (hub.reachable) {
-        this.log(`${hubName} is reachable locally`);
+        this.log(`Hub is reachable locally (${hubName})`);
       } else {
         this.log.warn(
-          `${hubName} is reachable locally, but did not return expected response`
+          `Hub is reachable locally, but did not return expected response (${hubName})`
         );
       }
     } catch (e) {
       hub.reachable = false;
       this.log.warn(
-        `${hubName} is not reachable locally.`,
+        `Hub is not reachable locally (${hubName}).`,
         (!this.config.debug && e.message) || e
       );
     }
 
     if (!hub.reachable) {
-      this.log.warn(`Will continue without local control for ${hubName}`);
+      this.log.warn(`Will continue without local control for hub (${hubName})`);
     }
 
     return hub.reachable;
@@ -260,8 +260,9 @@ export default class WinkClient {
       return;
     }
 
-    const errorMessage = `Could not authenticate with local Wink hub (${hub
-      .device.last_reading.ip_address})`;
+    const hubName = `${hub.device.name}, ${hub.device.last_reading.ip_address}`;
+
+    const errorMessage = `Could not authenticate with local hub (${hubName})`;
     let authenticated = false;
 
     try {
@@ -286,10 +287,7 @@ export default class WinkClient {
       authenticated = true;
       hub.access_token = response.access_token;
 
-      this.log(
-        `Authenticated with local Wink hub (${hub.device.last_reading
-          .ip_address})`
-      );
+      this.log(`Authenticated with local hub (${hubName})`);
     } catch (e) {
       this.log.warn(errorMessage, e);
     } finally {
@@ -337,10 +335,13 @@ export default class WinkClient {
       ).catch(e => {
         hub.authenticated = false;
         delete hub.access_token;
+
+        const hubName = `${hub.device.name}, ${hub.device.last_reading
+          .ip_address}`;
+
         this.log(
           "warn",
-          `Local control failed (${hub.device.last_reading
-            .ip_address}), falling back to remote control`,
+          `Local control failed, falling back to remote control (${hubName})`,
           e
         );
         return remote;
