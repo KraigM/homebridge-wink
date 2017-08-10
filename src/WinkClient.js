@@ -31,7 +31,8 @@ export default class WinkClient {
   request(options, hub) {
     const accessToken = hub ? hub.access_token : this.config.access_token;
     const headers = {
-      "User-Agent": "Manufacturer/Apple-iPhone8_1 iOS/10.3.1 WinkiOS/5.8.0.27-production-release (Scale/2.00)"
+      "User-Agent":
+        "Manufacturer/Apple-iPhone8_1 iOS/10.3.1 WinkiOS/5.8.0.27-production-release (Scale/2.00)"
     };
 
     if (accessToken && options.uri !== "/oauth2/token") {
@@ -139,7 +140,8 @@ export default class WinkClient {
           server.close();
         } else {
           response.writeHead(302, {
-            Location: `https://api.wink.com/oauth2/authorize?response_type=code&client_id=${this.config.client_id}&redirect_uri=${redirectUri}&state=${state}`
+            Location: `https://api.wink.com/oauth2/authorize?response_type=code&client_id=${this
+              .config.client_id}&redirect_uri=${redirectUri}&state=${state}`
           });
           return response.end();
         }
@@ -193,6 +195,7 @@ export default class WinkClient {
   processHubs(devices) {
     devices
       .filter(device => device.object_type === "hub")
+      .filter(device => !device.hidden_at)
       .filter(device => device.last_reading.ip_address)
       .forEach(async device => {
         const hub = this.addOrUpdateHub(device);
@@ -213,7 +216,8 @@ export default class WinkClient {
   }
 
   async isHubReachable(hub) {
-    const errorMessage = `Wink hub (${hub.device.last_reading.ip_address}) is not reachable locally`;
+    const errorMessage = `Wink hub (${hub.device.last_reading
+      .ip_address}) is not reachable locally`;
 
     try {
       const response = await this.request(
@@ -244,7 +248,8 @@ export default class WinkClient {
       return;
     }
 
-    const errorMessage = `Could not authenticate with local Wink hub (${hub.device.last_reading.ip_address})`;
+    const errorMessage = `Could not authenticate with local Wink hub (${hub
+      .device.last_reading.ip_address})`;
     let authenticated = false;
 
     try {
@@ -270,7 +275,8 @@ export default class WinkClient {
       hub.access_token = response.access_token;
 
       this.log(
-        `Authenticated with local Wink hub (${hub.device.last_reading.ip_address})`
+        `Authenticated with local Wink hub (${hub.device.last_reading
+          .ip_address})`
       );
     } catch (e) {
       this.log.warn(errorMessage, e);
@@ -284,7 +290,8 @@ export default class WinkClient {
 
   updateDevice(accessory, state) {
     this.log(
-      `Sending update: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`,
+      `Sending update: ${accessory.context.name} (${accessory.context
+        .object_type}/${accessory.context.object_id})`,
       state
     );
 
@@ -292,7 +299,8 @@ export default class WinkClient {
 
     const remote = this.request({
       method: "PUT",
-      uri: `/${accessory.definition.group}/${accessory.context.object_id}/desired_state`,
+      uri: `/${accessory.definition.group}/${accessory.context
+        .object_id}/desired_state`,
       body: {
         desired_state: state,
         nonce: this.nonce
@@ -306,7 +314,8 @@ export default class WinkClient {
       const local = this.request(
         {
           method: "PUT",
-          uri: `/${accessory.definition.group}/${accessory.context.local_id}/desired_state`,
+          uri: `/${accessory.definition.group}/${accessory.context
+            .local_id}/desired_state`,
           body: {
             desired_state: state,
             nonce: this.nonce
@@ -318,7 +327,8 @@ export default class WinkClient {
         delete hub.access_token;
         this.log(
           "warn",
-          `Local control failed (${hub.device.last_reading.ip_address}), falling back to remote control`,
+          `Local control failed (${hub.device.last_reading
+            .ip_address}), falling back to remote control`,
           e
         );
         return remote;
@@ -329,7 +339,8 @@ export default class WinkClient {
 
     return Promise.race(requests).then(response => {
       this.log(
-        `Update sent successfully: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`
+        `Update sent successfully: ${accessory.context.name} (${accessory
+          .context.object_type}/${accessory.context.object_id})`
       );
       return response;
     });
