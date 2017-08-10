@@ -70,7 +70,7 @@ export default class WinkPlatform {
   checkVersion() {
     childProcess.exec(`npm view ${pkg.name} version`, (error, stdout) => {
       const latestVersion = stdout && stdout.trim();
-      if (latestVersion && compareVersions(stdout.trim(), pkg.version)) {
+      if (latestVersion && compareVersions(stdout.trim(), pkg.version) > 0) {
         this.log.warn(
           `NOTICE: New version of ${pkg.name} available: ${latestVersion}`
         );
