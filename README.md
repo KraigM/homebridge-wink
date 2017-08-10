@@ -22,6 +22,8 @@ Yet another Wink plugin for [homebridge](https://github.com/nfarina/homebridge).
 
 ## Installation
 
+Requires Node.js 6 or later.
+
 1. Install homebridge: `npm install -g homebridge`
 2. Install this plugin: `npm install -g homebridge-wink3`
 3. Update your configuration file. See sample config.json snippet below.
