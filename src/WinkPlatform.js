@@ -31,6 +31,7 @@ export default class WinkPlatform {
       config: this.config,
       definitions: this.definitions,
       hap: api.hap,
+      log,
       onChange: this.handleAccessoryStateChange.bind(this)
     });
     this.client = new WinkClient({

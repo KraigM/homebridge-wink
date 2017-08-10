@@ -3,6 +3,7 @@ export default class AccessoryHelper {
     this.config = options.config;
     this.definitions = options.definitions;
     this.hap = options.hap;
+    this.log = options.log;
     this.onChange = options.onChange;
   }
 
@@ -114,9 +115,9 @@ export default class AccessoryHelper {
         callback();
       })
       .catch(e => {
-        this.log(
-          "error",
-          `Failed to update device: ${accessory.context.name} (${accessory.context.object_type}/${accessory.context.object_id})`,
+        this.log.error(
+          `Failed to update device: ${accessory.context.name} (${accessory
+            .context.object_type}/${accessory.context.object_id})`,
           e
         );
         callback(e);
