@@ -141,7 +141,11 @@ export default class WinkPlatform {
   }
 
   addDevice(device) {
-    const accessory = new this.api.platformAccessory(device.name, device.uuid);
+    const { uuid } = this.api.hap;
+    const deviceId = uuid.isValid(device.uuid)
+      ? device.uuid
+      : uuid.generateUUID(device.uuid);
+    const accessory = new this.api.platformAccessory(device.name, deviceId);
     this.patchAccessory(accessory, device);
     this.accessoryHelper.configureAccessory(accessory);
     this.api.registerPlatformAccessories(pluginName, platformName, [accessory]);
