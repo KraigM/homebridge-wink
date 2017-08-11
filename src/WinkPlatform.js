@@ -193,7 +193,7 @@ export default class WinkPlatform {
   annotateDevices(devices) {
     return devices
       .filter(device => device.object_type !== "hub")
-      .filter(device => !device.hidden_at && device.uuid != "[removed]")
+      .filter(device => !device.hidden_at)
       .map(device => {
         const definition = this.definitions[device.object_type];
         const isSupported = !!definition;
