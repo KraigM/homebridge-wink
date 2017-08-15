@@ -171,13 +171,13 @@ export default class WinkPlatform {
 
       const response = await this.client.getDevices();
 
-      const data = this.annotateDevices(response.data);
-      const devices = data.filter(x => x.valid).map(x => x.device);
+      const [hubs, devices, ignoreDevices] = this.sortDevices(response.data);
+
+      this.client.processHubs(hubs);
 
       const toRemove = this.accessories.diffRemove(devices);
       const toUpdate = this.accessories.intersection(devices);
       const toAdd = this.accessories.diffAdd(devices);
-      const toIgnore = data.filter(x => !x.valid);
 
       if (response.subscription) {
         this.subscriptions.subscribe(response.subscription);
@@ -186,7 +186,7 @@ export default class WinkPlatform {
       toRemove.forEach(this.removeAccessory, this);
       toUpdate.forEach(this.updateDevice, this);
       toAdd.forEach(this.addDevice, this);
-      toIgnore.forEach(this.ignoreDevice, this);
+      ignoreDevices.forEach(this.ignoreDevice, this);
 
       this.log("Devices refreshed");
     } catch (e) {
@@ -194,54 +194,62 @@ export default class WinkPlatform {
     }
   }
 
-  annotateDevices(devices) {
-    return devices
+  sortDevices(devices) {
+    const supportedDevices = [];
+    const ignoreDevices = [];
+
+    const currentDevices = devices.filter(device => !device.hidden_at);
+
+    currentDevices
       .filter(device => device.object_type !== "hub")
-      .filter(device => !device.hidden_at)
-      .map(device => {
+      .forEach(device => {
         const definition = this.definitions[device.object_type];
-        const isSupported = !!definition;
+
+        if (!definition) {
+          ignoreDevices.push([device, "Not supported by HomeKit"]);
+          return;
+        }
 
         const hide_groups =
-          isSupported &&
-          (this.config.hide_groups.indexOf(definition.group) !== -1 ||
-            this.config.hide_groups.indexOf(definition.type) !== -1);
+          this.config.hide_groups.indexOf(definition.group) !== -1 ||
+          this.config.hide_groups.indexOf(definition.type) !== -1;
 
-        const hide_ids =
-          isSupported && this.config.hide_ids.indexOf(device.object_id) !== -1;
+        if (hide_groups) {
+          ignoreDevices.push([device, "Hidden by hide_groups config option"]);
+          return;
+        }
 
-        return {
-          device,
-          definition,
-          isSupported,
-          hide_groups,
-          hide_ids,
-          valid: isSupported && !(hide_groups || hide_ids)
-        };
+        const hide_ids = this.config.hide_ids.indexOf(device.object_id) !== -1;
+
+        if (hide_ids) {
+          ignoreDevices.push([device, "Hidden by hide_ids config option"]);
+          return;
+        }
+
+        supportedDevices.push(device);
       });
+
+    const hubIds = supportedDevices.filter(x => x.hub_id).map(x => x.hub_id);
+
+    const hubs = currentDevices.filter(
+      device =>
+        device.object_type === "hub" &&
+        hubIds.includes(device.hub_id) &&
+        device.last_reading.ip_address
+    );
+
+    return [hubs, supportedDevices, ignoreDevices];
   }
 
   ignoreDevice(data) {
-    if (!this.accessories.ignore(data.device)) {
+    const [device, reason] = data;
+    if (!this.accessories.ignore(device)) {
       return;
     }
 
-    let reason = null;
-
-    if (!data.isSupported) {
-      reason = "Not supported by HomeKit";
-    } else if (data.hide_groups) {
-      reason = "Hidden by hide_groups config option";
-    } else if (data.hide_ids) {
-      reason = "Hidden by hide_ids config option";
-    }
-
-    if (reason) {
-      this.log(
-        `${reason}: ${data.device.name} (${data.device.object_type}/${data
-          .device.object_id})`
-      );
-    }
+    this.log(
+      `${reason}: ${device.name} (${device.object_type}/${device.object_id})`
+    );
   }
 
   removeAccessory(accessory) {

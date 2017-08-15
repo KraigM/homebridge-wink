@@ -179,31 +179,25 @@ export default class WinkClient {
     });
   }
 
-  async getDevices(object_type = "wink_device") {
-    const response = await this.request({
+  getDevices(object_type = "wink_device") {
+    return this.request({
       method: "GET",
       uri: `/users/me/${object_type}s`
     });
-
-    if (this.direct_access) {
-      this.processHubs(response.data);
-    }
-
-    return response;
   }
 
-  processHubs(devices) {
-    devices
-      .filter(device => device.object_type === "hub")
-      .filter(device => !device.hidden_at)
-      .filter(device => device.last_reading.ip_address)
-      .forEach(async device => {
-        const hub = this.addOrUpdateHub(device);
-        const isReachable = await this.isHubReachable(hub);
-        if (isReachable) {
-          this.authenticateHub(hub);
-        }
-      });
+  processHubs(hubs) {
+    if (!this.direct_access) {
+      return;
+    }
+
+    hubs.forEach(async device => {
+      const hub = this.addOrUpdateHub(device);
+      const isReachable = await this.isHubReachable(hub);
+      if (isReachable) {
+        this.authenticateHub(hub);
+      }
+    });
   }
 
   addOrUpdateHub(hub) {
