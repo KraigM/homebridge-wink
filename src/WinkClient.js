@@ -191,12 +191,16 @@ export default class WinkClient {
       return;
     }
 
-    hubs.forEach(async device => {
-      const hub = this.addOrUpdateHub(device);
-      const isReachable = await this.isHubReachable(hub);
-      if (isReachable) {
-        this.authenticateHub(hub);
-      }
+    hubs.forEach((device, index) => {
+      setTimeout(async () => {
+        const hub = this.addOrUpdateHub(device);
+        const isReachable = await this.isHubReachable(hub);
+        if (isReachable) {
+          this.authenticateHub(hub);
+        }
+
+        // Wink API is throttled, too many hubs and we'll hit a HTTP 429 error
+      }, 1000 * index);
     });
   }
 
