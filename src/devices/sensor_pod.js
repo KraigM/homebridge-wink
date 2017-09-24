@@ -53,7 +53,7 @@ export default ({ Characteristic, Service }) => {
         characteristics: [
           {
             characteristic: Characteristic.CurrentRelativeHumidity,
-            get: state => state.humidity
+            get: state => Math.round(state.humidity * 100)
           }
         ]
       },
