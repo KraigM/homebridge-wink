@@ -1,22 +1,59 @@
 {
-	"name": "homebridge-wink",
-	"description": "HomeBridge plugin for the Wink hub",
-	"version": "2.1.1",
-	"repository": {
-		"type": "git",
-		"url": "git://github.com/kraigm/homebridge-wink.git"
-	},
-	"license": "ISC",
-	"preferGlobal": true,
-	"keywords": [
-		"homebridge-plugin",
-		"wink"
-	],
-	"engines": {
-		"node": ">=0.12.0",
-		"homebridge": ">=0.2.5"
-	},
-	"dependencies": {
-		"pubnub": ">=4.4.0"
-	}
+  "name": "homebridge-wink3",
+  "version": "1.5.8",
+  "description": "Homebridge plugin for wink.com",
+  "homepage": "https://github.com/sibartlett/homebridge-wink3",
+  "repository": "git://github.com/sibartlett/homebridge-wink3",
+  "author": "Simon Bartlett <simon@sibartlett.com>",
+  "license": "ISC",
+  "main": "dist/index.js",
+  "preferGlobal": true,
+  "keywords": [
+    "homebridge-plugin",
+    "wink"
+  ],
+  "engines": {
+    "node": ">=6.0.0",
+    "homebridge": ">=0.4.21"
+  },
+  "scripts": {
+    "build": "rimraf dist/ && babel src/ --out-dir dist/ --source-maps",
+    "dropcache": "rm /usr/local/lib/node_modules/homebridge/node_modules/node-persist/storage/accessories/cachedAccessories",
+    "lint": "eslint .",
+    "prettier": "prettier --write src/**/*.js",
+    "precommit": "lint-staged",
+    "prepublish": "npm run build",
+    "prestart": "npm run build",
+    "start": "homebridge -D -P . -U ."
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "dependencies": {
+    "compare-versions": "^3.0.1",
+    "ip": "^1.1.5",
+    "lodash": "^4.17.4",
+    "pubnub": "^4.12.0",
+    "request": "^2.81.0",
+    "request-promise-native": "^1.0.4",
+    "require-all": "^2.2.0",
+    "source-map-support": "^0.4.15"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-stage-2": "^6.24.1",
+    "eslint": "^4.3.0",
+    "eslint-config-prettier": "^2.3.0",
+    "eslint-plugin-prettier": "^2.1.2",
+    "husky": "^0.14.3",
+    "lint-staged": "^4.0.2",
+    "prettier": "^1.5.3",
+    "rimraf": "^2.6.1"
+  }
 }
