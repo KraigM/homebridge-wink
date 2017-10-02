@@ -1,9 +1,9 @@
 {
-  "name": "homebridge-wink3",
-  "version": "1.5.8",
+  "name": "homebridge-wink",
+  "version": "3.5.8",
   "description": "Homebridge plugin for wink.com",
-  "homepage": "https://github.com/sibartlett/homebridge-wink3",
-  "repository": "git://github.com/sibartlett/homebridge-wink3",
+  "homepage": "https://github.com/kraigm/homebridge-wink",
+  "repository": "git://github.com/kraigm/homebridge-wink",
   "author": "Simon Bartlett <simon@sibartlett.com>",
   "license": "ISC",
   "main": "dist/index.js",

@@ -1,4 +1,4 @@
-# homebridge-wink3
+# homebridge-wink
 
 Yet another Wink plugin for [homebridge](https://github.com/nfarina/homebridge).
 
@@ -25,7 +25,7 @@ Yet another Wink plugin for [homebridge](https://github.com/nfarina/homebridge).
 Requires Node.js 6 or later.
 
 1. Install homebridge: `npm install -g homebridge`
-2. Install this plugin: `npm install -g homebridge-wink3`
+2. Install this plugin: `npm install -g homebridge-wink`
 3. Update your configuration file. See sample config.json snippet below.
 
 ## Configuration
@@ -61,7 +61,7 @@ Requires Node.js 6 or later.
 
 ## Authentication
 
-homebridge-wink3 supports 3 methods of authentication.
+homebridge-wink supports 3 methods of authentication.
 
 * [OAuth Authorization Code](#oauth-authorization-code) (Preferred)
 * [OAuth Password Grant](#oauth-password-grant)
@@ -80,7 +80,7 @@ Note: DO NOT use use `username` and `password` configuration options.
 1. Create an account at [developer.wink.com](https://developer.wink.com)
 2. [Create an application](https://developer.wink.com/clients/new), with the following information:
   * Name: Homebridge
-  * Website: https://github.com/sibartlett/homebridge-wink3
+  * Website: https://github.com/kraigm/homebridge-wink
   * Redirect URI: http://<HOMEBRIDGE_IP>:8888
   * Check "I agree to the terms and conditions"
 3. Wait for the application to be approved (may take hours)
